@@ -2,27 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Visualizador UPM</title>
+    <title>Visualizador UPM - Panamá</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; }
+        
         .control-panel {
-            position: absolute; top: 10px; left: 50px; z-index: 1000;
-            background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: absolute; top: 15px; left: 60px; z-index: 1000;
+            background: white; padding: 12px; border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #ccc;
         }
+        
+        select {
+            padding: 8px; width: 220px; border-radius: 4px;
+            border: 1px solid #007bff; margin-top: 5px; cursor: pointer;
+        }
+
         .info-box {
-            padding: 8px; background: rgba(255,255,255,0.9);
-            box-shadow: 0 0 10px rgba(0,0,0,0.2); border-radius: 5px;
+            padding: 10px; background: rgba(255,255,255,0.95);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px;
+            border-left: 5px solid #007bff; line-height: 1.4;
         }
     </style>
 </head>
 <body>
 
 <div class="control-panel">
-    <strong>Provincia:</strong><br>
+    <strong>Filtrar por Provincia:</strong><br>
     <select id="provinciaSelect" onchange="filtrarProvincia()">
-        <option value="todos">Cargando...</option>
+        <option value="todos">Cargando datos...</option>
     </select>
 </div>
 
@@ -31,46 +40,59 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // 1. Configuración Inicial del Mapa
+    // 1. Capas Base
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
 
-    const map = L.map('map', { center: [8.5, -80.0], zoom: 8, layers: [osm] });
-    L.control.layers({ "Calles": osm, "Satélite": satellite }).addTo(map);
+    const map = L.map('map', { 
+        center: [8.5, -80.0], 
+        zoom: 8, 
+        layers: [osm] 
+    });
+
+    L.control.layers({ "Calles": osm, "Satélite": satellite }, null, { collapsed: false }).addTo(map);
 
     let geojsonLayer;
     let datosCompletos;
 
-    // 2. Cuadro de Info (Hover)
-    const info = L.control();
+    // 2. Cuadro de Información Lateral
+    const info = L.control({position: 'topright'});
     info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info-box');
         this.update();
         return this._div;
     };
     info.update = function (props) {
-        this._div.innerHTML = '<h4>Atributos UPM</h4>' +  (props ?
-            '<b>UPM:</b> ' + props.CODIGO_UPM + '<br><b>Provincia:</b> ' + props.PROV_NOMB :
+        this._div.innerHTML = '<h4>Datos de la UPM</h4>' +  (props ?
+            '<b>CODIGO_UPM:</b> ' + props.CODIGO_UPM + '<br>' +
+            '<b>Provincia:</b> ' + props.PROV_NOMB + '<br>' +
+            '<b>Distrito:</b> ' + props.DIST_NOMB :
             'Pase el mouse sobre un polígono');
     };
     info.addTo(map);
 
-    // 3. DEFINICIÓN DE FUNCIONES (Antes de usarlas)
-    
-    function style(feature) {
-        return { fillColor: '#3388ff', weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.5 };
+    // 3. Funciones de Estilo e Interacción
+    function estiloBase(feature) {
+        return {
+            fillColor: '#3388ff',
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.4
+        };
     }
 
     function mostrarCapa(data) {
         if (geojsonLayer) map.removeLayer(geojsonLayer);
 
         geojsonLayer = L.geoJSON(data, {
-            style: style,
+            style: estiloBase,
             onEachFeature: function(feature, layer) {
                 layer.on({
                     mouseover: function(e) {
-                        var l = e.target;
+                        const l = e.target;
                         l.setStyle({ weight: 3, color: '#ffea00', fillOpacity: 0.7 });
+                        l.bringToFront();
                         info.update(l.feature.properties);
                     },
                     mouseout: function(e) {
@@ -88,12 +110,16 @@
 
     function poblarSelector(data) {
         const select = document.getElementById('provinciaSelect');
+        // Extraer nombres únicos del campo PROV_NOMB
         const provincias = [...new Set(data.features.map(f => f.properties.PROV_NOMB))].sort();
-        select.innerHTML = '<option value="todos">-- Todas --</option>';
+        
+        select.innerHTML = '<option value="todos">-- Todas las Provincias --</option>';
         provincias.forEach(prov => {
-            const el = document.createElement('option');
-            el.value = el.textContent = prov;
-            select.appendChild(el);
+            if(prov) {
+                const el = document.createElement('option');
+                el.value = el.textContent = prov;
+                select.appendChild(el);
+            }
         });
     }
 
@@ -110,10 +136,10 @@
         }
     }
 
-    // 4. CARGA DE DATOS (Al final de todo)
-    fetch('upm_tot.json')
+    // 4. CARGA DEL ARCHIVO (Nombre actualizado)
+    fetch('upm_tot.geojson')
         .then(res => {
-            if(!res.ok) throw new Error("Error " + res.status + ": No se encontró el archivo");
+            if(!res.ok) throw new Error("No se pudo cargar 'upm_total.geojson'. Revisa el nombre en GitHub.");
             return res.json();
         })
         .then(data => {
@@ -121,7 +147,10 @@
             poblarSelector(data);
             mostrarCapa(data);
         })
-        .catch(err => alert("Error: " + err.message));
+        .catch(err => {
+            console.error(err);
+            alert("Error: " + err.message);
+        });
 
 </script>
 </body>
