@@ -5,25 +5,28 @@
     <title>Visualizador UPM - Panamá</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         #map { height: 100vh; width: 100%; }
         
         .control-panel {
             position: absolute; top: 15px; left: 60px; z-index: 1000;
             background: white; padding: 12px; border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #ccc;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #ddd;
         }
         
         select {
             padding: 8px; width: 220px; border-radius: 4px;
-            border: 1px solid #007bff; margin-top: 5px; cursor: pointer;
+            border: 1px solid #ffb347; margin-top: 5px; cursor: pointer;
         }
 
         .info-box {
             padding: 10px; background: rgba(255,255,255,0.95);
             box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px;
-            border-left: 5px solid #007bff; line-height: 1.4;
+            border-left: 5px solid #ffb347; line-height: 1.5;
+            min-width: 200px;
         }
+
+        h4 { margin: 0 0 5px 0; color: #e67e22; }
     </style>
 </head>
 <body>
@@ -50,35 +53,37 @@
         layers: [osm] 
     });
 
+    // Control de capas (Calles y Satélite)
     L.control.layers({ "Calles": osm, "Satélite": satellite }, null, { collapsed: false }).addTo(map);
 
     let geojsonLayer;
     let datosCompletos;
 
-    // 2. Cuadro de Información Lateral
+    // 2. Cuadro de Información (Hover)
     const info = L.control({position: 'topright'});
     info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info-box');
         this.update();
         return this._div;
     };
-    info.update = function (props) {
-        this._div.innerHTML = '<h4>Datos de la UPM</h4>' +  (props ?
-            '<b>CODIGO_UPM:</b> ' + props.CODIGO_UPM + '<br>' +
-            '<b>Provincia:</b> ' + props.PROV_NOMB + '<br>' +
-            '<b>Distrito:</b> ' + props.DIST_NOMB :
+    info.update = function (p) {
+        this._div.innerHTML = '<h4>Datos de la UPM</h4>' +  (p ?
+            '<b>CÓDIGO UPM:</b> ' + (p.CODIGO_UPM || 'N/A') + '<br>' +
+            '<b>LUGAR POBLADO:</b> ' + (p.LUPO_NOMB || 'No definido') + '<br>' +
+            '<b>PROVINCIA:</b> ' + (p.PROV_NOMB || '') + '<br>' +
+            '<b>DISTRITO:</b> ' + (p.DIST_NOMB || '') :
             'Pase el mouse sobre un polígono');
     };
     info.addTo(map);
 
-    // 3. Funciones de Estilo e Interacción
+    // 3. Estilo Naranja Pastel e Interacción
     function estiloBase(feature) {
         return {
-            fillColor: '#3388ff',
-            weight: 1,
+            fillColor: '#ffcc99', // Naranja pastel
+            weight: 1.2,
             opacity: 1,
-            color: 'white',
-            fillOpacity: 0.4
+            color: '#e67e22',     // Borde un poco más oscuro
+            fillOpacity: 0.6
         };
     }
 
@@ -91,7 +96,12 @@
                 layer.on({
                     mouseover: function(e) {
                         const l = e.target;
-                        l.setStyle({ weight: 3, color: '#ffea00', fillOpacity: 0.7 });
+                        l.setStyle({ 
+                            weight: 3, 
+                            color: '#d35400', 
+                            fillOpacity: 0.8,
+                            fillColor: '#ffb347' 
+                        });
                         l.bringToFront();
                         info.update(l.feature.properties);
                     },
@@ -110,7 +120,6 @@
 
     function poblarSelector(data) {
         const select = document.getElementById('provinciaSelect');
-        // Extraer nombres únicos del campo PROV_NOMB
         const provincias = [...new Set(data.features.map(f => f.properties.PROV_NOMB))].sort();
         
         select.innerHTML = '<option value="todos">-- Todas las Provincias --</option>';
@@ -136,10 +145,10 @@
         }
     }
 
-    // 4. CARGA DEL ARCHIVO (Nombre actualizado)
+    // 4. Carga del archivo corregido
     fetch('upm_tot.geojson')
         .then(res => {
-            if(!res.ok) throw new Error("No se pudo cargar 'upm_total.geojson'. Revisa el nombre en GitHub.");
+            if(!res.ok) throw new Error("No se pudo cargar 'upm_tot.geojson'");
             return res.json();
         })
         .then(data => {
