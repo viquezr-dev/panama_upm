@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador UPM - COTEL</title>
+    <title>Visualizador UPM</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -122,33 +122,27 @@
         info.update();
     }
 
-    // 5. Carga de Datos GeoJSON
-    // Cambia 'upm_tot.json' por la ruta real de tu archivo en el repo
-    fetch('upm_tot.json')
-        .then(response => response.json())
-        .then(data => {
-            datosCompletos = data;
-            poblarSelector(data);
-            mostrarCapa(data);
-        });
+    // --- CARGA DE DATOS CON DEPURACIÓN ---
+const nombreArchivo = 'upm_tot.json'; // <--- ASEGÚRATE QUE SEA .json o .geojson
 
-    function mostrarCapa(data) {
-        if (geojsonLayer) map.removeLayer(geojsonLayer);
-
-        geojsonLayer = L.geoJSON(data, {
-            style: style,
-            onEachFeature: function(feature, layer) {
-                layer.on({
-                    mouseover: highlightFeature,
-                    mouseout: resetHighlight
-                });
-            }
-        }).addTo(map);
-
-        if (data.features.length > 0) {
-            map.fitBounds(geojsonLayer.getBounds());
+fetch(nombreArchivo)
+    .then(response => {
+        if (!response.ok) {
+            // Si el archivo no existe en el servidor de GitHub
+            throw new Error('No se encontró el archivo "' + nombreArchivo + '". Verifica que esté en la raíz del repositorio.');
         }
-    }
+        return response.json();
+    })
+    .then(data => {
+        console.log("¡Éxito! Datos cargados:", data);
+        datosCompletos = data;
+        poblarSelector(data);
+        mostrarCapa(data);
+    })
+    .catch(error => {
+        console.error("Error detallado:", error);
+        alert("Atención: " + error.message);
+    });
 
     // 6. Lógica del Selector de Provincias
     function poblarSelector(data) {
