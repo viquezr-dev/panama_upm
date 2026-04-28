@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador UPM - COTEL</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        
+        .control-panel {
+            position: absolute;
+            top: 10px;
+            left: 50px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        select {
+            padding: 5px;
+            width: 200px;
+            border-radius: 4px;
+        }
+
+        .info-box {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="control-panel">
+    <strong>Filtrar por Provincia:</strong><br>
+    <select id="provinciaSelect" onchange="filtrarProvincia()">
+        <option value="todos">Cargando provincias...</option>
+    </select>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 1. Configuración de Mapas Base
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    });
+
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+    });
+
+    const map = L.map('map', {
+        center: [8.5, -80.0], // Centro de Panamá
+        zoom: 8,
+        layers: [osm]
+    });
+
+    const baseMaps = {
+        "Calles (OSM)": osm,
+        "Satélite (Esri)": satellite
+    };
+
+    L.control.layers(baseMaps).addTo(map);
+
+    // 2. Variables Globales
+    let geojsonLayer;
+    let datosCompletos;
+    const info = L.control();
+
+    // 3. Cuadro de información (Hover)
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info-box');
+        this.update();
+        return this._div;
+    };
+
+    info.update = function (props) {
+        this._div.innerHTML = '<h4>Código UPM</h4>' +  (props ?
+            '<b>' + props.CODIGO_UPM + '</b><br />' + props.PROV_NOMB :
+            'Pase el mouse sobre un polígono');
+    };
+
+    info.addTo(map);
+
+    // 4. Estilo de los polígonos
+    function style(feature) {
+        return {
+            fillColor: '#3388ff',
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.6
+        };
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+        info.update(layer.feature.properties);
+    }
+
+    function resetHighlight(e) {
+        geojsonLayer.resetStyle(e.target);
+        info.update();
+    }
+
+    // 5. Carga de Datos GeoJSON
+    // Cambia 'upm_tot.json' por la ruta real de tu archivo en el repo
+    fetch('upm_tot.json')
+        .then(response => response.json())
+        .then(data => {
+            datosCompletos = data;
+            poblarSelector(data);
+            mostrarCapa(data);
+        });
+
+    function mostrarCapa(data) {
+        if (geojsonLayer) map.removeLayer(geojsonLayer);
+
+        geojsonLayer = L.geoJSON(data, {
+            style: style,
+            onEachFeature: function(feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight
+                });
+            }
+        }).addTo(map);
+
+        if (data.features.length > 0) {
+            map.fitBounds(geojsonLayer.getBounds());
+        }
+    }
+
+    // 6. Lógica del Selector de Provincias
+    function poblarSelector(data) {
+        const select = document.getElementById('provinciaSelect');
+        const provincias = [...new Set(data.features.map(f => f.properties.PROV_NOMB))].sort();
+        
+        select.innerHTML = '<option value="todos">-- Todas las Provincias --</option>';
+        provincias.forEach(prov => {
+            const el = document.createElement('option');
+            el.textContent = prov;
+            el.value = prov;
+            select.appendChild(el);
+        });
+    }
+
+    function filtrarProvincia() {
+        const valor = document.getElementById('provinciaSelect').value;
+        if (valor === "todos") {
+            mostrarCapa(datosCompletos);
+        } else {
+            const filtrados = {
+                type: "FeatureCollection",
+                features: datosCompletos.features.filter(f => f.properties.PROV_NOMB === valor)
+            };
+            mostrarCapa(filtrados);
+        }
+    }
+</script>
+
+</body>
+</html>
