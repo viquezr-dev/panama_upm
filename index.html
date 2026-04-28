@@ -2,48 +2,27 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualizador UPM</title>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { margin: 0; padding: 0; }
         #map { height: 100vh; width: 100%; }
-        
         .control-panel {
-            position: absolute;
-            top: 10px;
-            left: 50px;
-            z-index: 1000;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            position: absolute; top: 10px; left: 50px; z-index: 1000;
+            background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        
-        select {
-            padding: 5px;
-            width: 200px;
-            border-radius: 4px;
-        }
-
         .info-box {
-            padding: 6px 8px;
-            font: 14px/16px Arial, Helvetica, sans-serif;
-            background: white;
-            background: rgba(255,255,255,0.8);
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            border-radius: 5px;
+            padding: 8px; background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
 <div class="control-panel">
-    <strong>Filtrar por Provincia:</strong><br>
+    <strong>Provincia:</strong><br>
     <select id="provinciaSelect" onchange="filtrarProvincia()">
-        <option value="todos">Cargando provincias...</option>
+        <option value="todos">Cargando...</option>
     </select>
 </div>
 
@@ -52,125 +31,98 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // 1. Configuración de Mapas Base
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    });
+    // 1. Configuración Inicial del Mapa
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
 
-    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri'
-    });
+    const map = L.map('map', { center: [8.5, -80.0], zoom: 8, layers: [osm] });
+    L.control.layers({ "Calles": osm, "Satélite": satellite }).addTo(map);
 
-    const map = L.map('map', {
-        center: [8.5, -80.0], // Centro de Panamá
-        zoom: 8,
-        layers: [osm]
-    });
-
-    const baseMaps = {
-        "Calles (OSM)": osm,
-        "Satélite (Esri)": satellite
-    };
-
-    L.control.layers(baseMaps).addTo(map);
-
-    // 2. Variables Globales
     let geojsonLayer;
     let datosCompletos;
-    const info = L.control();
 
-    // 3. Cuadro de información (Hover)
+    // 2. Cuadro de Info (Hover)
+    const info = L.control();
     info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info-box');
         this.update();
         return this._div;
     };
-
     info.update = function (props) {
-        this._div.innerHTML = '<h4>Código UPM</h4>' +  (props ?
-            '<b>' + props.CODIGO_UPM + '</b><br />' + props.PROV_NOMB :
+        this._div.innerHTML = '<h4>Atributos UPM</h4>' +  (props ?
+            '<b>UPM:</b> ' + props.CODIGO_UPM + '<br><b>Provincia:</b> ' + props.PROV_NOMB :
             'Pase el mouse sobre un polígono');
     };
-
     info.addTo(map);
 
-    // 4. Estilo de los polígonos
+    // 3. DEFINICIÓN DE FUNCIONES (Antes de usarlas)
+    
     function style(feature) {
-        return {
-            fillColor: '#3388ff',
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            fillOpacity: 0.6
-        };
+        return { fillColor: '#3388ff', weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.5 };
     }
 
-    function highlightFeature(e) {
-        var layer = e.target;
-        layer.setStyle({
-            weight: 5,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
-        info.update(layer.feature.properties);
-    }
+    function mostrarCapa(data) {
+        if (geojsonLayer) map.removeLayer(geojsonLayer);
 
-    function resetHighlight(e) {
-        geojsonLayer.resetStyle(e.target);
-        info.update();
-    }
+        geojsonLayer = L.geoJSON(data, {
+            style: style,
+            onEachFeature: function(feature, layer) {
+                layer.on({
+                    mouseover: function(e) {
+                        var l = e.target;
+                        l.setStyle({ weight: 3, color: '#ffea00', fillOpacity: 0.7 });
+                        info.update(l.feature.properties);
+                    },
+                    mouseout: function(e) {
+                        geojsonLayer.resetStyle(e.target);
+                        info.update();
+                    }
+                });
+            }
+        }).addTo(map);
 
-    // --- CARGA DE DATOS CON DEPURACIÓN ---
-const nombreArchivo = 'upm_tot.geojson'; // 
-
-fetch(nombreArchivo)
-    .then(response => {
-        if (!response.ok) {
-            // Si el archivo no existe en el servidor de GitHub
-            throw new Error('No se encontró el archivo "' + nombreArchivo + '". Verifica que esté en la raíz del repositorio.');
+        if (data.features.length > 0) {
+            map.fitBounds(geojsonLayer.getBounds());
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log("¡Éxito! Datos cargados:", data);
-        datosCompletos = data;
-        poblarSelector(data);
-        mostrarCapa(data);
-    })
-    .catch(error => {
-        console.error("Error detallado:", error);
-        alert("Atención: " + error.message);
-    });
+    }
 
-    // 6. Lógica del Selector de Provincias
     function poblarSelector(data) {
         const select = document.getElementById('provinciaSelect');
         const provincias = [...new Set(data.features.map(f => f.properties.PROV_NOMB))].sort();
-        
-        select.innerHTML = '<option value="todos">-- Todas las Provincias --</option>';
+        select.innerHTML = '<option value="todos">-- Todas --</option>';
         provincias.forEach(prov => {
             const el = document.createElement('option');
-            el.textContent = prov;
-            el.value = prov;
+            el.value = el.textContent = prov;
             select.appendChild(el);
         });
     }
 
     function filtrarProvincia() {
-        const valor = document.getElementById('provinciaSelect').value;
-        if (valor === "todos") {
+        const val = document.getElementById('provinciaSelect').value;
+        if (val === "todos") {
             mostrarCapa(datosCompletos);
         } else {
             const filtrados = {
                 type: "FeatureCollection",
-                features: datosCompletos.features.filter(f => f.properties.PROV_NOMB === valor)
+                features: datosCompletos.features.filter(f => f.properties.PROV_NOMB === val)
             };
             mostrarCapa(filtrados);
         }
     }
-</script>
 
+    // 4. CARGA DE DATOS (Al final de todo)
+    fetch('upm_tot.json')
+        .then(res => {
+            if(!res.ok) throw new Error("Error " + res.status + ": No se encontró el archivo");
+            return res.json();
+        })
+        .then(data => {
+            datosCompletos = data;
+            poblarSelector(data);
+            mostrarCapa(data);
+        })
+        .catch(err => alert("Error: " + err.message));
+
+</script>
 </body>
 </html>
