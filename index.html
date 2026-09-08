@@ -570,6 +570,10 @@ function cargarNivelTerritorial(nivel) {
     
     if (cacheDatos[nivel]) {
         procesarYMostrar(nivel);
+        // IMPORTANTE: Actualizar filtros después de procesar
+        setTimeout(() => {
+            actualizarFiltrosCascadaCompleta();
+        }, 100);
         return;
     }
 
@@ -581,13 +585,193 @@ function cargarNivelTerritorial(nivel) {
             cacheDatos[nivel] = results.data;
             procesarYMostrar(nivel);
             actualizarSelectoresFiltros();
-            actualizarFiltrosCascada();
+            // IMPORTANTE: Actualizar filtros en cascada completa
+            setTimeout(() => {
+                actualizarFiltrosCascadaCompleta();
+            }, 200);
         },
         error: function(err) {
             document.getElementById('contador-registros').innerText = "❌ Error al cargar: " + nivel;
             console.error(err);
         }
     });
+}
+
+function actualizarFiltrosCascadaCompleta() {
+    // Esta función actualiza TODOS los filtros en cascada
+    const pVal = document.getElementById('filtro-provincia').value;
+    const dVal = document.getElementById('filtro-distrito').value;
+    const cVal = document.getElementById('filtro-corregimiento').value;
+    
+    // Actualizar distritos si hay provincia seleccionada
+    if (pVal && cacheDatos['distritos']) {
+        const distSelect = document.getElementById('filtro-distrito');
+        const valorActual = distSelect.value;
+        distSelect.innerHTML = '<option value="">Todos</option>';
+        
+        const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
+        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
+        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        unicos.forEach(d => {
+            distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
+        });
+        
+        // Restaurar valor si existía
+        if (valorActual && [...distSelect.options].some(opt => opt.value === valorActual)) {
+            distSelect.value = valorActual;
+        }
+    }
+    
+    // Actualizar corregimientos si hay provincia y distrito seleccionado
+    if (pVal && dVal && cacheDatos['corregimientos']) {
+        const corrSelect = document.getElementById('filtro-corregimiento');
+        const valorActual = corrSelect.value;
+        corrSelect.innerHTML = '<option value="">Todos</option>';
+        
+        const filtrados = cacheDatos['corregimientos'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal);
+        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
+        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        unicos.forEach(c => {
+            corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
+        });
+        
+        // Restaurar valor si existía
+        if (valorActual && [...corrSelect.options].some(opt => opt.value === valorActual)) {
+            corrSelect.value = valorActual;
+        }
+    }
+    
+    // Actualizar poblados si hay provincia, distrito y corregimiento seleccionado
+    if (pVal && dVal && cVal && cacheDatos['poblados']) {
+        const lupoSelect = document.getElementById('filtro-poblado');
+        const valorActual = lupoSelect.value;
+        lupoSelect.innerHTML = '<option value="">Todos</option>';
+        
+        const filtrados = cacheDatos['poblados'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal && r.CORR_ID === cVal);
+        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
+        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        unicos.forEach(l => {
+            lupoSelect.options.add(new Option(`${l.id} - ${l.nomb}`, l.id));
+        });
+        
+        // Restaurar valor si existía
+        if (valorActual && [...lupoSelect.options].some(opt => opt.value === valorActual)) {
+            lupoSelect.value = valorActual;
+        }
+    }
+}
+
+function filtrarCascada(tipoFiltro) {
+    const pVal = document.getElementById('filtro-provincia').value;
+    
+    if (tipoFiltro === 'provincia') {
+        rebuildSelect('filtro-distrito');
+        rebuildSelect('filtro-corregimiento');
+        rebuildSelect('filtro-poblado');
+        
+        if (pVal && cacheDatos['distritos']) {
+            const distSelect = document.getElementById('filtro-distrito');
+            const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
+            
+            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
+            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            
+            unicos.forEach(d => {
+                distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
+            });
+        }
+    } 
+    else if (tipoFiltro === 'distrito') {
+        rebuildSelect('filtro-corregimiento');
+        rebuildSelect('filtro-poblado');
+        const dVal = document.getElementById('filtro-distrito').value;
+        
+        if (pVal && dVal && cacheDatos['corregimientos']) {
+            const corrSelect = document.getElementById('filtro-corregimiento');
+            const filtrados = cacheDatos['corregimientos'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal);
+            
+            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
+            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            
+            unicos.forEach(c => {
+                corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
+            });
+        }
+    }
+    else if (tipoFiltro === 'corregimiento') {
+        rebuildSelect('filtro-poblado');
+        const dVal = document.getElementById('filtro-distrito').value;
+        const cVal = document.getElementById('filtro-corregimiento').value;
+
+        if (pVal && dVal && cVal && cacheDatos['poblados']) {
+            const lupoSelect = document.getElementById('filtro-poblado');
+            const filtrados = cacheDatos['poblados'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal && r.CORR_ID === cVal);
+            
+            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
+            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            
+            unicos.forEach(l => {
+                lupoSelect.options.add(new Option(`${l.id} - ${l.nomb}`, l.id));
+            });
+        }
+    }
+
+    // Cargar datos faltantes si es necesario
+    const nivelesAsegurar = ['distritos', 'corregimientos', 'poblados'];
+    nivelesAsegurar.forEach(n => {
+        if(!cacheDatos[n]) {
+            Papa.parse(csvPaths[n], {
+                download: true, header: true, skipEmptyLines: true,
+                complete: (res) => { 
+                    cacheDatos[n] = res.data; 
+                    actualizarSelectoresFiltros();
+                    // Después de cargar, actualizar cascada completa
+                    setTimeout(() => {
+                        actualizarFiltrosCascadaCompleta();
+                    }, 100);
+                }
+            });
+        }
+    });
+
+    aplicarFiltrosYRenderizar();
+}
+
+function cambiarNivel(nuevoNivel) {
+    if (nuevoNivel === nivelActivo) return;
+    
+    // Actualizar historial - evitar duplicados consecutivos
+    if (historialNiveles[historialNiveles.length - 1] !== nuevoNivel) {
+        const indiceExistente = historialNiveles.indexOf(nuevoNivel);
+        if (indiceExistente !== -1) {
+            historialNiveles = historialNiveles.slice(0, indiceExistente + 1);
+        } else {
+            historialNiveles.push(nuevoNivel);
+        }
+    }
+    
+    nivelActivo = nuevoNivel;
+    
+    // Actualizar el select de nivel
+    document.getElementById('select-nivel').value = nuevoNivel;
+    
+    // Mostrar/ocultar filtros según nivel
+    document.getElementById('div-filtro-prov').style.display = nuevoNivel !== 'provincia' ? 'block' : 'none';
+    document.getElementById('div-filtro-dist').style.display = ['corregimientos', 'poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
+    document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
+    document.getElementById('div-filtro-lupo').style.display = nuevoNivel === 'barrios' ? 'block' : 'none';
+    
+    // Mostrar/ocultar leyenda de poblados
+    document.getElementById('leyenda-poblados').style.display = nuevoNivel === 'poblados' ? 'block' : 'none';
+    
+    // Limpiar filtros al cambiar de nivel
+    limpiarFiltros(false);
+    
+    cargarNivelTerritorial(nuevoNivel);
+    actualizarHistorialSelect();
 }
 
 function procesarYMostrar(nivel) {
@@ -623,42 +807,6 @@ function generarCabecera(nivel) {
     head.innerHTML = html;
 }
 
-function cambiarNivel(nuevoNivel) {
-    if (nuevoNivel === nivelActivo) return;
-    
-    // Actualizar historial - evitar duplicados consecutivos
-    if (historialNiveles[historialNiveles.length - 1] !== nuevoNivel) {
-        // Si el nivel ya existe en el historial, eliminar todos los posteriores
-        const indiceExistente = historialNiveles.indexOf(nuevoNivel);
-        if (indiceExistente !== -1) {
-            // Si el nivel ya existe, truncar el historial hasta ese punto
-            historialNiveles = historialNiveles.slice(0, indiceExistente + 1);
-        } else {
-            // Si no existe, agregar al final
-            historialNiveles.push(nuevoNivel);
-        }
-    }
-    
-    nivelActivo = nuevoNivel;
-    
-    // Actualizar el select de nivel
-    document.getElementById('select-nivel').value = nuevoNivel;
-    
-    // Mostrar/ocultar filtros según nivel
-    document.getElementById('div-filtro-prov').style.display = nuevoNivel !== 'provincia' ? 'block' : 'none';
-    document.getElementById('div-filtro-dist').style.display = ['corregimientos', 'poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
-    document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
-    document.getElementById('div-filtro-lupo').style.display = nuevoNivel === 'barrios' ? 'block' : 'none';
-    
-    // Mostrar/ocultar leyenda de poblados
-    document.getElementById('leyenda-poblados').style.display = nuevoNivel === 'poblados' ? 'block' : 'none';
-    
-    // Limpiar filtros al cambiar de nivel
-    limpiarFiltros(false);
-    
-    cargarNivelTerritorial(nuevoNivel);
-    actualizarHistorialSelect();
-}
 
 function regresarNivelSelect(valor) {
     if (!valor) return;
@@ -770,78 +918,6 @@ function actualizarFiltrosCascada() {
             distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
         });
     }
-}
-
-function filtrarCascada(tipoFiltro) {
-    const pVal = document.getElementById('filtro-provincia').value;
-    
-    if (tipoFiltro === 'provincia') {
-        rebuildSelect('filtro-distrito');
-        rebuildSelect('filtro-corregimiento');
-        rebuildSelect('filtro-poblado');
-        
-        if (pVal && cacheDatos['distritos']) {
-            const distSelect = document.getElementById('filtro-distrito');
-            const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(d => {
-                distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
-            });
-        }
-    } 
-    else if (tipoFiltro === 'distrito') {
-        rebuildSelect('filtro-corregimiento');
-        rebuildSelect('filtro-poblado');
-        const dVal = document.getElementById('filtro-distrito').value;
-        
-        if (pVal && dVal && cacheDatos['corregimientos']) {
-            const corrSelect = document.getElementById('filtro-corregimiento');
-            const filtrados = cacheDatos['corregimientos'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(c => {
-                corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
-            });
-        }
-    }
-    else if (tipoFiltro === 'corregimiento') {
-        rebuildSelect('filtro-poblado');
-        const dVal = document.getElementById('filtro-distrito').value;
-        const cVal = document.getElementById('filtro-corregimiento').value;
-
-        if (pVal && dVal && cVal && cacheDatos['poblados']) {
-            const lupoSelect = document.getElementById('filtro-poblado');
-            const filtrados = cacheDatos['poblados'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal && r.CORR_ID === cVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(l => {
-                lupoSelect.options.add(new Option(`${l.id} - ${l.nomb}`, l.id));
-            });
-        }
-    }
-
-    // Cargar datos faltantes si es necesario
-    const nivelesAsegurar = ['distritos', 'corregimientos', 'poblados'];
-    nivelesAsegurar.forEach(n => {
-        if(!cacheDatos[n]) {
-            Papa.parse(csvPaths[n], {
-                download: true, header: true, skipEmptyLines: true,
-                complete: (res) => { 
-                    cacheDatos[n] = res.data; 
-                    actualizarSelectoresFiltros();
-                }
-            });
-        }
-    });
-
-    aplicarFiltrosYRenderizar();
 }
 
 function rebuildSelect(id) {
