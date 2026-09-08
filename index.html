@@ -93,16 +93,6 @@
             font-weight: 600;
             font-size: 18px;
         }
-        .descripcion-box {
-            background: #fff7e6;
-            border: 1px solid #ffe0b5;
-            border-radius: 12px;
-            padding: 6px 14px;
-            margin: 6px 0;
-            font-size: 11px;
-            color: #b46f3a;
-            display: none;
-        }
         .toolbar {
             background: #fef9f4;
             padding: 10px 14px;
@@ -110,76 +100,56 @@
             margin-bottom: 12px;
             border: 1px solid #ffe5cc;
         }
-        .nivel-section {
-            margin-bottom: 8px;
-        }
-        .selector-nivel {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .selector-nivel select {
-            padding: 5px 10px;
-            border: 2px solid #bae6fd;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            background: #e0f2fe;
-            color: #0369a1;
-            cursor: pointer;
-            outline: none;
-            min-width: 130px;
-            transition: all 0.2s ease;
-        }
-        .selector-nivel select:hover {
-            border-color: #6b5b95;
-        }
-        .selector-nivel select:focus {
-            border-color: #6b5b95;
-            box-shadow: 0 0 0 2px rgba(107, 91, 149, 0.15);
-        }
-        .selector-nivel select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .selector-nivel select option {
-            padding: 4px 8px;
-        }
-        .nivel-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #6b5b95;
-            white-space: nowrap;
-        }
         .filtros-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
         }
         .filtro-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             background: white;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 30px;
             border: 1px solid #f0cfb0;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 0;
+        }
+        .filtro-item.visible {
+            opacity: 1;
+            max-height: 50px;
+            padding: 4px 12px;
+            margin: 0;
         }
         .filtro-item label {
             font-weight: 600;
             color: #9b7b5c;
             font-size: 10px;
+            white-space: nowrap;
         }
         .filtro-select {
-            padding: 3px 6px;
+            padding: 4px 8px;
             border: 1px solid #f0cfb0;
             border-radius: 16px;
-            font-size: 10px;
+            font-size: 11px;
             background: white;
-            min-width: 100px;
+            min-width: 120px;
             outline: none;
+            transition: all 0.2s ease;
+        }
+        .filtro-select:focus {
+            border-color: #6b5b95;
+            box-shadow: 0 0 0 2px rgba(107, 91, 149, 0.15);
+        }
+        .filtro-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .controles-globales {
             display: flex;
@@ -206,6 +176,24 @@
             color: #2c6b8f;
         }
         .btn-exportar:hover { background: #9ad6ff; }
+        .btn-regresar {
+            padding: 4px 14px;
+            background: #ffd3b6;
+            color: #a5673f;
+            border: 2px solid #ffc4a0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: all 0.2s ease;
+        }
+        .btn-regresar:hover:not(:disabled) {
+            background: #ffc4a0;
+        }
+        .btn-regresar:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         
         .search-box {
             width: 100%;
@@ -290,15 +278,7 @@
             font-size: 11px;
             color: #8b6b4d;
         }
-        .loading {
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            color: #6b5b95;
-            font-size: 12px;
-        }
-
-        /* Leyenda de poblados mejorada */
+        
         .leyenda-poblados {
             background: #e0f2fe;
             border: 1px solid #bae6fd;
@@ -324,15 +304,13 @@
         }
 
         @media (max-width: 768px) {
-            .filtro-select { min-width: 80px; font-size: 9px; }
+            .filtro-select { min-width: 80px; font-size: 10px; }
             .header { flex-direction: column; align-items: flex-start; }
             .credits { align-items: flex-start; width: 100%; }
-            .filtros-container { flex-direction: column; }
-            .filtro-item { width: 100%; justify-content: space-between; }
+            .filtros-container { flex-direction: column; align-items: stretch; }
+            .filtro-item { width: 100%; }
+            .filtro-item.visible { max-height: 80px; }
             .filtro-select { flex: 1; min-width: 0; }
-            .selector-nivel { flex-direction: column; align-items: stretch; }
-            .selector-nivel select { width: 100%; min-width: 0; }
-            .nivel-label { font-size: 10px; }
             th, td { padding: 4px 6px; font-size: 9px; }
             .table-wrapper { max-height: 350px; }
             .controles-globales { justify-content: center; }
@@ -348,7 +326,7 @@
             th, td { padding: 3px 5px; font-size: 8px; }
             table { min-width: 500px; }
             .search-box { font-size: 11px; padding: 5px 12px; }
-            .selector-nivel select { font-size: 10px; padding: 4px 8px; }
+            .filtro-select { font-size: 9px; }
         }
     </style>
 </head>
@@ -374,58 +352,56 @@
         <h1>Explorador de Datos Territoriales</h1>
 
         <div class="toolbar">
-            <div class="nivel-section">
-                <div class="selector-nivel">
-                    <span class="nivel-label">📍 Nivel:</span>
-                    <select id="select-nivel" onchange="cambiarNivel(this.value)">
-                        <option value="provincia">Provincias</option>
-                        <option value="distritos">Distritos</option>
-                        <option value="corregimientos">Corregimientos</option>
-                        <option value="poblados">Poblados</option>
-                        <option value="barrios">Barrios</option>
-                    </select>
-                    
-                    <span class="nivel-label" style="margin-left:5px;">⬅️</span>
-                    <select id="select-regresar" onchange="regresarNivelSelect(this.value)" disabled>
-                        <option value="">Historial</option>
-                    </select>
-                </div>
-            </div>
-
             <div class="filtros-container">
-                <div class="filtro-item" id="div-filtro-prov" style="display:none;">
-                    <label>Provincia:</label>
-                    <select id="filtro-provincia" class="filtro-select" onchange="filtrarCascada('provincia')">
-                        <option value="">Todas</option>
+                <!-- Provincia - Siempre visible -->
+                <div class="filtro-item visible" id="div-filtro-prov">
+                    <label>🏛️ Provincia:</label>
+                    <select id="filtro-provincia" class="filtro-select" onchange="seleccionarProvincia(this.value)">
+                        <option value="">Seleccione una provincia...</option>
                     </select>
                 </div>
-                <div class="filtro-item" id="div-filtro-dist" style="display:none;">
-                    <label>Distrito:</label>
-                    <select id="filtro-distrito" class="filtro-select" onchange="filtrarCascada('distrito')">
-                        <option value="">Todos</option>
+
+                <!-- Distrito - Se muestra después de seleccionar provincia -->
+                <div class="filtro-item" id="div-filtro-dist">
+                    <label>📍 Distrito:</label>
+                    <select id="filtro-distrito" class="filtro-select" onchange="seleccionarDistrito(this.value)" disabled>
+                        <option value="">Seleccione un distrito...</option>
                     </select>
                 </div>
-                <div class="filtro-item" id="div-filtro-corr" style="display:none;">
-                    <label>Corregimiento:</label>
-                    <select id="filtro-corregimiento" class="filtro-select" onchange="filtrarCascada('corregimiento')">
-                        <option value="">Todos</option>
+
+                <!-- Corregimiento - Se muestra después de seleccionar distrito -->
+                <div class="filtro-item" id="div-filtro-corr">
+                    <label>📌 Corregimiento:</label>
+                    <select id="filtro-corregimiento" class="filtro-select" onchange="seleccionarCorregimiento(this.value)" disabled>
+                        <option value="">Seleccione un corregimiento...</option>
                     </select>
                 </div>
-                <div class="filtro-item" id="div-filtro-lupo" style="display:none;">
-                    <label>Poblado:</label>
-                    <select id="filtro-poblado" class="filtro-select" onchange="filtrarCascada('poblado')">
-                        <option value="">Todos</option>
+
+                <!-- Poblado - Se muestra después de seleccionar corregimiento -->
+                <div class="filtro-item" id="div-filtro-pob">
+                    <label>🏘️ Poblado:</label>
+                    <select id="filtro-poblado" class="filtro-select" onchange="seleccionarPoblado(this.value)" disabled>
+                        <option value="">Seleccione un poblado...</option>
+                    </select>
+                </div>
+
+                <!-- Barrio - Se muestra después de seleccionar poblado -->
+                <div class="filtro-item" id="div-filtro-bar">
+                    <label>🏠 Barrio:</label>
+                    <select id="filtro-barrio" class="filtro-select" onchange="seleccionarBarrio(this.value)" disabled>
+                        <option value="">Seleccione un barrio...</option>
                     </select>
                 </div>
             </div>
 
             <div class="controles-globales">
-                <button class="btn-global btn-limpiar" onclick="limpiarFiltros()">Limpiar Filtros</button>
-                <button class="btn-global btn-exportar" onclick="exportarCSV()">Exportar</button>
+                <button class="btn-regresar" id="btn-regresar" onclick="regresarNivel()" disabled>⬅️ Regresar</button>
+                <button class="btn-global btn-limpiar" onclick="limpiarTodo()">🗑️ Limpiar</button>
+                <button class="btn-global btn-exportar" onclick="exportarCSV()">📊 Exportar</button>
             </div>
         </div>
 
-        <!-- Leyenda de poblados (se muestra automáticamente) -->
+        <!-- Leyenda de poblados -->
         <div class="leyenda-poblados" id="leyenda-poblados">
             <strong>📋 Poblados - Clasificación:</strong>
             <span class="clase-item">🔵 CLASE 1: Cabecera</span>
@@ -441,22 +417,23 @@
             <span class="clase-item">📍 CATE 2: Sitio</span>
         </div>
 
-        <input type="text" id="search-input" class="search-box" placeholder="Buscar..." oninput="filtrarTabla()">
+        <input type="text" id="search-input" class="search-box" placeholder="Buscar..." oninput="filtrarTabla()" disabled>
 
         <div class="resultados-info" id="contador-registros">
-            Cargando datos...
+            Seleccione una provincia para comenzar
         </div>
 
         <div class="table-wrapper">
             <table id="tabla-datos">
                 <thead id="tabla-head"></thead>
-                <tbody id="tabla-body"></tbody>
+                <tbody id="tabla-body">
+                    <tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione una provincia para ver los datos</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-// Configuración de rutas de archivos CSV
 const csvPaths = {
     provincia: './data/provincias.csv',
     distritos: './data/distritos.csv',
@@ -465,89 +442,43 @@ const csvPaths = {
     barrios: './data/barrios.csv'
 };
 
-// ESTRUCTURA DE CAMPOS - SIN fid
 const estructurasDeCampos = {
-    provincia: [
-        'PROV_ID', 'PROV_NOMB', 'PROV_LEY', 'LEY_MOD_P',
-        'GACETA_P', 'GACE_MOD_P', 'Shape_Leng', 'Shape_Area'
-    ],
-    distritos: [
-        'PROV_ID', 'PROV_NOMB', 'DIST_ID', 'DIST_NOMB',
-        'DIST_LEY', 'LEY_MOD_D', 'GACETA_D', 'GACE_MOD_D',
-        'Shape_Leng', 'Shape_Area', 'DIST_CODE'
-    ],
-    corregimientos: [
-        'PROV_ID', 'PROV_NOMB', 'DIST_ID', 'DIST_NOMB',
-        'CORR_ID', 'CORR_NOMB', 'CORR_LEY', 'LEY_MOD_C',
-        'GACETA_C', 'GACE_MOD_C', 'Shape_Leng', 'Shape_Area',
-        'REGI_ID', 'CORR_CODE', 'DIST_CODE'
-    ],
-    poblados: [
-        'PROV_ID', 'DIST_ID', 'CORR_ID', 'LUPO_ID',
-        'CODIGO', 'LUPO_NOMB', 'LUPO_CLASE', 'DESCRIP_ON',
-        'LUPO_CATE', 'LUPO_TIPO'
-    ],
-    barrios: [
-        'PROV_ID', 'DIST_ID', 'CORR_ID', 'LUPO_ID',
-        'BARR_ID', 'CODIGO', 'BARR_NOMB', 'BARR_CLASE', 'DESCRIP_ON'
-    ]
+    provincia: ['PROV_ID', 'PROV_NOMB', 'PROV_LEY', 'LEY_MOD_P', 'GACETA_P', 'GACE_MOD_P', 'Shape_Leng', 'Shape_Area'],
+    distritos: ['PROV_ID', 'PROV_NOMB', 'DIST_ID', 'DIST_NOMB', 'DIST_LEY', 'LEY_MOD_D', 'GACETA_D', 'GACE_MOD_D', 'Shape_Leng', 'Shape_Area', 'DIST_CODE'],
+    corregimientos: ['PROV_ID', 'PROV_NOMB', 'DIST_ID', 'DIST_NOMB', 'CORR_ID', 'CORR_NOMB', 'CORR_LEY', 'LEY_MOD_C', 'GACETA_C', 'GACE_MOD_C', 'Shape_Leng', 'Shape_Area', 'REGI_ID', 'CORR_CODE', 'DIST_CODE'],
+    poblados: ['PROV_ID', 'DIST_ID', 'CORR_ID', 'LUPO_ID', 'CODIGO', 'LUPO_NOMB', 'LUPO_CLASE', 'DESCRIP_ON', 'LUPO_CATE', 'LUPO_TIPO'],
+    barrios: ['PROV_ID', 'DIST_ID', 'CORR_ID', 'LUPO_ID', 'BARR_ID', 'CODIGO', 'BARR_NOMB', 'BARR_CLASE', 'DESCRIP_ON']
 };
 
-// NOMBRES AMIGABLES
 const nombresColumnas = {
-    'PROV_ID': 'Prov ID',
-    'PROV_NOMB': 'Provincia',
-    'PROV_LEY': 'Ley Prov',
-    'LEY_MOD_P': 'Ley Mod Prov',
-    'GACETA_P': 'Gaceta Prov',
-    'GACE_MOD_P': 'Gaceta Mod Prov',
-    'Shape_Leng': 'Perímetro (km)',
-    'Shape_Area': 'Área (km²)',
-    'DIST_ID': 'Dist ID',
-    'DIST_NOMB': 'Distrito',
-    'DIST_CODE': 'Cód Dist',
-    'DIST_LEY': 'Ley Dist',
-    'LEY_MOD_D': 'Ley Mod Dist',
-    'GACETA_D': 'Gaceta Dist',
-    'GACE_MOD_D': 'Gaceta Mod Dist',
-    'CORR_ID': 'Corr ID',
-    'CORR_NOMB': 'Corregimiento',
-    'CORR_CODE': 'Cód Corr',
-    'CORR_LEY': 'Ley Corr',
-    'LEY_MOD_C': 'Ley Mod Corr',
-    'GACETA_C': 'Gaceta Corr',
-    'GACE_MOD_C': 'Gaceta Mod Corr',
-    'REGI_ID': 'Región ID',
-    'LUPO_ID': 'LUPO ID',
-    'LUPO_NOMB': 'Poblado',
-    'LUPO_CLASE': 'Clase',
-    'LUPO_CATE': 'Categoría',
-    'LUPO_TIPO': 'Tipo',
-    'BARR_ID': 'Barrio ID',
-    'BARR_NOMB': 'Barrio',
-    'BARR_CLASE': 'Clase Barrio',
-    'CODIGO': 'Código',
-    'DESCRIP_ON': 'Descripción'
+    'PROV_ID': 'Prov ID', 'PROV_NOMB': 'Provincia', 'PROV_LEY': 'Ley Prov', 'LEY_MOD_P': 'Ley Mod Prov',
+    'GACETA_P': 'Gaceta Prov', 'GACE_MOD_P': 'Gaceta Mod Prov', 'Shape_Leng': 'Perímetro (km)', 'Shape_Area': 'Área (km²)',
+    'DIST_ID': 'Dist ID', 'DIST_NOMB': 'Distrito', 'DIST_CODE': 'Cód Dist', 'DIST_LEY': 'Ley Dist',
+    'LEY_MOD_D': 'Ley Mod Dist', 'GACETA_D': 'Gaceta Dist', 'GACE_MOD_D': 'Gaceta Mod Dist',
+    'CORR_ID': 'Corr ID', 'CORR_NOMB': 'Corregimiento', 'CORR_CODE': 'Cód Corr', 'CORR_LEY': 'Ley Corr',
+    'LEY_MOD_C': 'Ley Mod Corr', 'GACETA_C': 'Gaceta Corr', 'GACE_MOD_C': 'Gaceta Mod Corr', 'REGI_ID': 'Región ID',
+    'LUPO_ID': 'LUPO ID', 'LUPO_NOMB': 'Poblado', 'LUPO_CLASE': 'Clase', 'LUPO_CATE': 'Categoría', 'LUPO_TIPO': 'Tipo',
+    'BARR_ID': 'Barrio ID', 'BARR_NOMB': 'Barrio', 'BARR_CLASE': 'Clase Barrio', 'CODIGO': 'Código', 'DESCRIP_ON': 'Descripción'
 };
 
-// Estado global
 let cacheDatos = {};
-let nivelActivo = 'provincia';
+let nivelActual = 'provincia';
+let nivelSeleccionado = 'provincia';
 let datosFiltrados = [];
-let ordenAscendente = true;
-let columnaOrden = '';
 let historialNiveles = ['provincia'];
+let provSeleccionada = '';
+let distSeleccionado = '';
+let corrSeleccionado = '';
+let pobSeleccionado = '';
 
 window.addEventListener('DOMContentLoaded', () => {
     inicializarContadorVisitas();
-    cargarNivelTerritorial(nivelActivo);
-    actualizarSelectoresFiltros();
+    cargarProvincias();
 });
 
 function inicializarContadorVisitas() {
     const el = document.getElementById('visit-count');
     if (!el) return;
-    
     fetch(`https://api.staticcounter.com/v3/staticcounter?user=d1c14f6f37f6402b&key=panama_visor&format=json`)
         .then(res => res.json())
         .then(data => {
@@ -565,412 +496,390 @@ function inicializarContadorVisitas() {
         });
 }
 
-function cargarNivelTerritorial(nivel) {
-    document.getElementById('contador-registros').innerText = "Cargando...";
-    
-    if (cacheDatos[nivel]) {
-        procesarYMostrar(nivel);
-        // IMPORTANTE: Actualizar filtros después de procesar
-        setTimeout(() => {
-            actualizarFiltrosCascadaCompleta();
-        }, 100);
-        return;
-    }
-
-    Papa.parse(csvPaths[nivel], {
+function cargarProvincias() {
+    Papa.parse(csvPaths.provincia, {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            cacheDatos[nivel] = results.data;
-            procesarYMostrar(nivel);
-            actualizarSelectoresFiltros();
-            // IMPORTANTE: Actualizar filtros en cascada completa
-            setTimeout(() => {
-                actualizarFiltrosCascadaCompleta();
-            }, 200);
+            cacheDatos.provincia = results.data;
+            const provSelect = document.getElementById('filtro-provincia');
+            const provs = [...new Set(results.data
+                .filter(r => r.PROV_ID && r.PROV_NOMB)
+                .map(r => JSON.stringify({id: String(r.PROV_ID).trim(), nomb: String(r.PROV_NOMB).trim()})))
+            ].map(s => JSON.parse(s));
+            
+            provs.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            provs.forEach(p => {
+                provSelect.options.add(new Option(`${p.id.padStart(2, '0')} - ${p.nomb}`, p.id));
+            });
         },
         error: function(err) {
-            document.getElementById('contador-registros').innerText = "❌ Error al cargar: " + nivel;
-            console.error(err);
+            console.error("Error cargando provincias:", err);
         }
     });
 }
 
-function actualizarFiltrosCascadaCompleta() {
-    // Esta función actualiza TODOS los filtros en cascada
-    const pVal = document.getElementById('filtro-provincia').value;
-    const dVal = document.getElementById('filtro-distrito').value;
-    const cVal = document.getElementById('filtro-corregimiento').value;
-    
-    // Actualizar distritos si hay provincia seleccionada
-    if (pVal && cacheDatos['distritos']) {
-        const distSelect = document.getElementById('filtro-distrito');
-        const valorActual = distSelect.value;
-        distSelect.innerHTML = '<option value="">Todos</option>';
-        
-        const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
-        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
-        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        
-        unicos.forEach(d => {
-            distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
-        });
-        
-        // Restaurar valor si existía
-        if (valorActual && [...distSelect.options].some(opt => opt.value === valorActual)) {
-            distSelect.value = valorActual;
-        }
-    }
-    
-    // Actualizar corregimientos si hay provincia y distrito seleccionado
-    if (pVal && dVal && cacheDatos['corregimientos']) {
-        const corrSelect = document.getElementById('filtro-corregimiento');
-        const valorActual = corrSelect.value;
-        corrSelect.innerHTML = '<option value="">Todos</option>';
-        
-        const filtrados = cacheDatos['corregimientos'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal);
-        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
-        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        
-        unicos.forEach(c => {
-            corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
-        });
-        
-        // Restaurar valor si existía
-        if (valorActual && [...corrSelect.options].some(opt => opt.value === valorActual)) {
-            corrSelect.value = valorActual;
-        }
-    }
-    
-    // Actualizar poblados si hay provincia, distrito y corregimiento seleccionado
-    if (pVal && dVal && cVal && cacheDatos['poblados']) {
-        const lupoSelect = document.getElementById('filtro-poblado');
-        const valorActual = lupoSelect.value;
-        lupoSelect.innerHTML = '<option value="">Todos</option>';
-        
-        const filtrados = cacheDatos['poblados'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal && r.CORR_ID === cVal);
-        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
-        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        
-        unicos.forEach(l => {
-            lupoSelect.options.add(new Option(`${l.id} - ${l.nomb}`, l.id));
-        });
-        
-        // Restaurar valor si existía
-        if (valorActual && [...lupoSelect.options].some(opt => opt.value === valorActual)) {
-            lupoSelect.value = valorActual;
-        }
-    }
-}
-
-function filtrarCascada(tipoFiltro) {
-    const pVal = document.getElementById('filtro-provincia').value;
-    
-    if (tipoFiltro === 'provincia') {
-        rebuildSelect('filtro-distrito');
-        rebuildSelect('filtro-corregimiento');
-        rebuildSelect('filtro-poblado');
-        
-        if (pVal && cacheDatos['distritos']) {
-            const distSelect = document.getElementById('filtro-distrito');
-            const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(d => {
-                distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
-            });
-        }
-    } 
-    else if (tipoFiltro === 'distrito') {
-        rebuildSelect('filtro-corregimiento');
-        rebuildSelect('filtro-poblado');
-        const dVal = document.getElementById('filtro-distrito').value;
-        
-        if (pVal && dVal && cacheDatos['corregimientos']) {
-            const corrSelect = document.getElementById('filtro-corregimiento');
-            const filtrados = cacheDatos['corregimientos'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(c => {
-                corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
-            });
-        }
-    }
-    else if (tipoFiltro === 'corregimiento') {
-        rebuildSelect('filtro-poblado');
-        const dVal = document.getElementById('filtro-distrito').value;
-        const cVal = document.getElementById('filtro-corregimiento').value;
-
-        if (pVal && dVal && cVal && cacheDatos['poblados']) {
-            const lupoSelect = document.getElementById('filtro-poblado');
-            const filtrados = cacheDatos['poblados'].filter(r => r.PROV_ID === pVal && r.DIST_ID === dVal && r.CORR_ID === cVal);
-            
-            let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
-            unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
-            unicos.forEach(l => {
-                lupoSelect.options.add(new Option(`${l.id} - ${l.nomb}`, l.id));
-            });
-        }
-    }
-
-    // Cargar datos faltantes si es necesario
-    const nivelesAsegurar = ['distritos', 'corregimientos', 'poblados'];
-    nivelesAsegurar.forEach(n => {
-        if(!cacheDatos[n]) {
-            Papa.parse(csvPaths[n], {
-                download: true, header: true, skipEmptyLines: true,
-                complete: (res) => { 
-                    cacheDatos[n] = res.data; 
-                    actualizarSelectoresFiltros();
-                    // Después de cargar, actualizar cascada completa
-                    setTimeout(() => {
-                        actualizarFiltrosCascadaCompleta();
-                    }, 100);
-                }
-            });
-        }
-    });
-
-    aplicarFiltrosYRenderizar();
-}
-
-function cambiarNivel(nuevoNivel) {
-    if (nuevoNivel === nivelActivo) return;
-    
-    // Actualizar historial - evitar duplicados consecutivos
-    if (historialNiveles[historialNiveles.length - 1] !== nuevoNivel) {
-        const indiceExistente = historialNiveles.indexOf(nuevoNivel);
-        if (indiceExistente !== -1) {
-            historialNiveles = historialNiveles.slice(0, indiceExistente + 1);
-        } else {
-            historialNiveles.push(nuevoNivel);
-        }
-    }
-    
-    nivelActivo = nuevoNivel;
-    
-    // Actualizar el select de nivel
-    document.getElementById('select-nivel').value = nuevoNivel;
-    
-    // Mostrar/ocultar filtros según nivel
-    document.getElementById('div-filtro-prov').style.display = nuevoNivel !== 'provincia' ? 'block' : 'none';
-    document.getElementById('div-filtro-dist').style.display = ['corregimientos', 'poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
-    document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
-    document.getElementById('div-filtro-lupo').style.display = nuevoNivel === 'barrios' ? 'block' : 'none';
-    
-    // Mostrar/ocultar leyenda de poblados
-    document.getElementById('leyenda-poblados').style.display = nuevoNivel === 'poblados' ? 'block' : 'none';
-    
-    // Limpiar filtros al cambiar de nivel
-    limpiarFiltros(false);
-    
-    cargarNivelTerritorial(nuevoNivel);
-    actualizarHistorialSelect();
-}
-
-function procesarYMostrar(nivel) {
-    if (!cacheDatos[nivel] || cacheDatos[nivel].length === 0) {
-        document.getElementById('contador-registros').innerText = "⚠️ No hay datos";
+function seleccionarProvincia(id) {
+    if (!id) {
+        limpiarTodo();
         return;
     }
     
-    datosFiltrados = [...cacheDatos[nivel]];
+    provSeleccionada = id;
+    nivelActual = 'distritos';
+    historialNiveles = ['provincia', 'distritos'];
     
-    datosFiltrados.sort((a, b) => {
-        let idA = String(a.PROV_ID || '').trim();
-        let idB = String(b.PROV_ID || '').trim();
-        return idA.localeCompare(idB, undefined, { numeric: true });
-    });
-
-    generarCabecera(nivel);
-    aplicarFiltrosYRenderizar();
-    actualizarHistorialSelect();
+    // Mostrar y habilitar distritos
+    mostrarFiltro('div-filtro-dist');
+    const distSelect = document.getElementById('filtro-distrito');
+    distSelect.disabled = true;
+    distSelect.innerHTML = '<option value="">Cargando distritos...</option>';
+    
+    // Cargar distritos
+    if (!cacheDatos.distritos) {
+        Papa.parse(csvPaths.distritos, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                cacheDatos.distritos = results.data;
+                llenarDistritos(id);
+            }
+        });
+    } else {
+        llenarDistritos(id);
+    }
+    
+    // Mostrar datos de la provincia seleccionada
+    mostrarDatosNivel('provincia', id);
+    actualizarBotonRegresar();
+    document.getElementById('search-input').disabled = false;
 }
 
-function generarCabecera(nivel) {
+function llenarDistritos(provId) {
+    const distSelect = document.getElementById('filtro-distrito');
+    distSelect.innerHTML = '<option value="">Seleccione un distrito...</option>';
+    
+    const filtrados = cacheDatos.distritos.filter(r => r.PROV_ID === provId);
+    let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
+    unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    
+    unicos.forEach(d => {
+        distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
+    });
+    distSelect.disabled = false;
+}
+
+function seleccionarDistrito(id) {
+    if (!id) {
+        ocultarDesde('distritos');
+        mostrarDatosNivel('provincia', provSeleccionada);
+        return;
+    }
+    
+    distSeleccionado = id;
+    nivelActual = 'corregimientos';
+    historialNiveles = ['provincia', 'distritos', 'corregimientos'];
+    
+    mostrarFiltro('div-filtro-corr');
+    const corrSelect = document.getElementById('filtro-corregimiento');
+    corrSelect.disabled = true;
+    corrSelect.innerHTML = '<option value="">Cargando corregimientos...</option>';
+    
+    if (!cacheDatos.corregimientos) {
+        Papa.parse(csvPaths.corregimientos, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                cacheDatos.corregimientos = results.data;
+                llenarCorregimientos(provSeleccionada, id);
+            }
+        });
+    } else {
+        llenarCorregimientos(provSeleccionada, id);
+    }
+    
+    mostrarDatosNivel('distritos', id);
+    actualizarBotonRegresar();
+}
+
+function llenarCorregimientos(provId, distId) {
+    const corrSelect = document.getElementById('filtro-corregimiento');
+    corrSelect.innerHTML = '<option value="">Seleccione un corregimiento...</option>';
+    
+    const filtrados = cacheDatos.corregimientos.filter(r => r.PROV_ID === provId && r.DIST_ID === distId);
+    let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.CORR_ID, nomb: r.CORR_NOMB})))].map(s => JSON.parse(s));
+    unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    
+    unicos.forEach(c => {
+        corrSelect.options.add(new Option(`${c.id} - ${c.nomb}`, c.id));
+    });
+    corrSelect.disabled = false;
+}
+
+function seleccionarCorregimiento(id) {
+    if (!id) {
+        ocultarDesde('corregimientos');
+        mostrarDatosNivel('distritos', distSeleccionado);
+        return;
+    }
+    
+    corrSeleccionado = id;
+    nivelActual = 'poblados';
+    historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados'];
+    
+    mostrarFiltro('div-filtro-pob');
+    document.getElementById('leyenda-poblados').style.display = 'block';
+    
+    const pobSelect = document.getElementById('filtro-poblado');
+    pobSelect.disabled = true;
+    pobSelect.innerHTML = '<option value="">Cargando poblados...</option>';
+    
+    if (!cacheDatos.poblados) {
+        Papa.parse(csvPaths.poblados, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                cacheDatos.poblados = results.data;
+                llenarPoblados(provSeleccionada, distSeleccionado, id);
+            }
+        });
+    } else {
+        llenarPoblados(provSeleccionada, distSeleccionado, id);
+    }
+    
+    mostrarDatosNivel('corregimientos', id);
+    actualizarBotonRegresar();
+}
+
+function llenarPoblados(provId, distId, corrId) {
+    const pobSelect = document.getElementById('filtro-poblado');
+    pobSelect.innerHTML = '<option value="">Seleccione un poblado...</option>';
+    
+    const filtrados = cacheDatos.poblados.filter(r => r.PROV_ID === provId && r.DIST_ID === distId && r.CORR_ID === corrId);
+    let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.LUPO_ID, nomb: r.LUPO_NOMB})))].map(s => JSON.parse(s));
+    unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    
+    unicos.forEach(p => {
+        pobSelect.options.add(new Option(`${p.id} - ${p.nomb}`, p.id));
+    });
+    pobSelect.disabled = false;
+}
+
+function seleccionarPoblado(id) {
+    if (!id) {
+        ocultarDesde('poblados');
+        mostrarDatosNivel('corregimientos', corrSeleccionado);
+        return;
+    }
+    
+    pobSeleccionado = id;
+    nivelActual = 'barrios';
+    historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados', 'barrios'];
+    
+    mostrarFiltro('div-filtro-bar');
+    const barSelect = document.getElementById('filtro-barrio');
+    barSelect.disabled = true;
+    barSelect.innerHTML = '<option value="">Cargando barrios...</option>';
+    
+    if (!cacheDatos.barrios) {
+        Papa.parse(csvPaths.barrios, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                cacheDatos.barrios = results.data;
+                llenarBarrios(provSeleccionada, distSeleccionado, corrSeleccionado, id);
+            }
+        });
+    } else {
+        llenarBarrios(provSeleccionada, distSeleccionado, corrSeleccionado, id);
+    }
+    
+    mostrarDatosNivel('poblados', id);
+    actualizarBotonRegresar();
+}
+
+function llenarBarrios(provId, distId, corrId, lupoId) {
+    const barSelect = document.getElementById('filtro-barrio');
+    barSelect.innerHTML = '<option value="">Seleccione un barrio...</option>';
+    
+    const filtrados = cacheDatos.barrios.filter(r => r.PROV_ID === provId && r.DIST_ID === distId && r.CORR_ID === corrId && r.LUPO_ID === lupoId);
+    let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.BARR_ID, nomb: r.BARR_NOMB})))].map(s => JSON.parse(s));
+    unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    
+    unicos.forEach(b => {
+        barSelect.options.add(new Option(`${b.id} - ${b.nomb}`, b.id));
+    });
+    barSelect.disabled = false;
+}
+
+function seleccionarBarrio(id) {
+    if (!id) {
+        ocultarDesde('barrios');
+        mostrarDatosNivel('poblados', pobSeleccionado);
+        return;
+    }
+    
+    mostrarDatosNivel('barrios', id);
+}
+
+function mostrarFiltro(id) {
+    const elemento = document.getElementById(id);
+    elemento.classList.add('visible');
+}
+
+function ocultarFiltro(id) {
+    const elemento = document.getElementById(id);
+    elemento.classList.remove('visible');
+    const select = elemento.querySelector('select');
+    if (select) {
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        select.disabled = true;
+    }
+}
+
+function ocultarDesde(nivel) {
+    const niveles = ['distritos', 'corregimientos', 'poblados', 'barrios'];
+    const indices = {
+        'distritos': 0,
+        'corregimientos': 1,
+        'poblados': 2,
+        'barrios': 3
+    };
+    
+    const inicio = indices[nivel] || 0;
+    const ids = ['div-filtro-dist', 'div-filtro-corr', 'div-filtro-pob', 'div-filtro-bar'];
+    
+    for (let i = inicio; i < ids.length; i++) {
+        ocultarFiltro(ids[i]);
+    }
+    
+    // Ocultar leyenda si no estamos en poblados
+    if (nivel !== 'poblados') {
+        document.getElementById('leyenda-poblados').style.display = 'none';
+    }
+}
+
+function regresarNivel() {
+    if (historialNiveles.length <= 1) return;
+    
+    // Quitar el último nivel
+    historialNiveles.pop();
+    const nivelAnterior = historialNiveles[historialNiveles.length - 1];
+    
+    // Ocultar filtros según el nivel
+    if (nivelAnterior === 'provincia') {
+        ocultarDesde('distritos');
+        provSeleccionada = '';
+        distSeleccionado = '';
+        corrSeleccionado = '';
+        pobSeleccionado = '';
+        mostrarDatosNivel('provincia', '');
+        document.getElementById('filtro-provincia').value = '';
+        document.getElementById('search-input').disabled = true;
+        document.getElementById('contador-registros').innerText = 'Seleccione una provincia para comenzar';
+    } else if (nivelAnterior === 'distritos') {
+        ocultarDesde('corregimientos');
+        distSeleccionado = '';
+        corrSeleccionado = '';
+        pobSeleccionado = '';
+        mostrarDatosNivel('provincia', provSeleccionada);
+        document.getElementById('filtro-distrito').value = '';
+    } else if (nivelAnterior === 'corregimientos') {
+        ocultarDesde('poblados');
+        corrSeleccionado = '';
+        pobSeleccionado = '';
+        mostrarDatosNivel('distritos', distSeleccionado);
+        document.getElementById('filtro-corregimiento').value = '';
+        document.getElementById('leyenda-poblados').style.display = 'none';
+    } else if (nivelAnterior === 'poblados') {
+        ocultarDesde('barrios');
+        pobSeleccionado = '';
+        mostrarDatosNivel('corregimientos', corrSeleccionado);
+        document.getElementById('filtro-poblado').value = '';
+        document.getElementById('leyenda-poblados').style.display = 'block';
+    }
+    
+    nivelActual = nivelAnterior;
+    actualizarBotonRegresar();
+}
+
+function actualizarBotonRegresar() {
+    const btn = document.getElementById('btn-regresar');
+    btn.disabled = historialNiveles.length <= 1;
+}
+
+function mostrarDatosNivel(nivel, id) {
+    if (!id && nivel !== 'provincia') {
+        document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione un elemento para ver los datos</td></tr>';
+        document.getElementById('contador-registros').innerText = 'Seleccione un elemento para continuar';
+        return;
+    }
+    
+    if (!cacheDatos[nivel]) {
+        Papa.parse(csvPaths[nivel], {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                cacheDatos[nivel] = results.data;
+                procesarDatosNivel(nivel, id);
+            }
+        });
+    } else {
+        procesarDatosNivel(nivel, id);
+    }
+}
+
+function procesarDatosNivel(nivel, id) {
+    let datos = cacheDatos[nivel] || [];
+    
+    if (nivel === 'provincia' && id) {
+        datos = datos.filter(r => r.PROV_ID === id);
+    } else if (nivel === 'distritos' && id) {
+        datos = datos.filter(r => r.DIST_ID === id);
+    } else if (nivel === 'corregimientos' && id) {
+        datos = datos.filter(r => r.CORR_ID === id);
+    } else if (nivel === 'poblados' && id) {
+        datos = datos.filter(r => r.LUPO_ID === id);
+    } else if (nivel === 'barrios' && id) {
+        datos = datos.filter(r => r.BARR_ID === id);
+    }
+    
+    datosFiltrados = datos;
+    renderizarTabla(nivel);
+}
+
+function renderizarTabla(nivel) {
     const head = document.getElementById('tabla-head');
+    const tbody = document.getElementById('tabla-body');
     const campos = estructurasDeCampos[nivel];
+    
     if (!campos) return;
     
-    let html = '<tr>';
+    // Generar cabecera
+    let htmlHead = '<tr>';
     campos.forEach((campo) => {
         const label = nombresColumnas[campo] || campo;
-        html += `<th onclick="ordenarTabla('${campo}')">${label} <span id="sort-${campo}"></span></th>`;
+        htmlHead += `<th onclick="ordenarTabla('${campo}')">${label}</th>`;
     });
-    html += '</tr>';
-    head.innerHTML = html;
-}
-
-
-function regresarNivelSelect(valor) {
-    if (!valor) return;
+    htmlHead += '</tr>';
+    head.innerHTML = htmlHead;
     
-    // Encontrar el índice del nivel seleccionado en el historial
-    const indice = historialNiveles.indexOf(valor);
-    if (indice === -1 || indice === historialNiveles.length - 1) return;
-    
-    // Eliminar todos los niveles posteriores al seleccionado
-    historialNiveles = historialNiveles.slice(0, indice + 1);
-    
-    // Ir al nivel seleccionado
-    const nivelAnterior = historialNiveles[historialNiveles.length - 1];
-    nivelActivo = nivelAnterior;
-    
-    // Actualizar interfaz
-    document.getElementById('select-nivel').value = nivelAnterior;
-    
-    document.getElementById('div-filtro-prov').style.display = nivelAnterior !== 'provincia' ? 'block' : 'none';
-    document.getElementById('div-filtro-dist').style.display = ['corregimientos', 'poblados', 'barrios'].includes(nivelAnterior) ? 'block' : 'none';
-    document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nivelAnterior) ? 'block' : 'none';
-    document.getElementById('div-filtro-lupo').style.display = nivelAnterior === 'barrios' ? 'block' : 'none';
-    document.getElementById('leyenda-poblados').style.display = nivelAnterior === 'poblados' ? 'block' : 'none';
-    
-    limpiarFiltros(false);
-    cargarNivelTerritorial(nivelAnterior);
-    actualizarHistorialSelect();
-}
-
-function actualizarHistorialSelect() {
-    const select = document.getElementById('select-regresar');
-    const currentValue = select.value;
-    
-    // Limpiar el select manteniendo la opción por defecto
-    select.innerHTML = '<option value="">⬅️ Regresar a...</option>';
-    
-    // Agregar opciones del historial (excluyendo el último)
-    for (let i = 0; i < historialNiveles.length - 1; i++) {
-        const nivel = historialNiveles[i];
-        const label = {
-            'provincia': 'Provincias',
-            'distritos': 'Distritos',
-            'corregimientos': 'Corregimientos',
-            'poblados': 'Poblados',
-            'barrios': 'Barrios'
-        }[nivel] || nivel;
-        
-        const option = document.createElement('option');
-        option.value = nivel;
-        option.textContent = `↩️ ${label}`;
-        select.appendChild(option);
-    }
-    
-    // Habilitar/deshabilitar según historial
-    select.disabled = historialNiveles.length <= 1;
-    
-    // Restaurar valor seleccionado si existe
-    if (currentValue && [...select.options].some(opt => opt.value === currentValue)) {
-        select.value = currentValue;
-    } else {
-        select.value = "";
-    }
-    
-    // Depuración: Mostrar el historial en consola
-    console.log('Historial actual:', historialNiveles);
-}
-
-function actualizarSelectoresFiltros() {
-    const provSelect = document.getElementById('filtro-provincia');
-    if (!provSelect) return;
-    
-    // Solo llenar si está vacío
-    if (provSelect.options.length > 1) return;
-
-    if (cacheDatos['provincia']) {
-        const provs = [...new Set(cacheDatos['provincia']
-            .filter(r => r.PROV_ID && r.PROV_NOMB)
-            .map(r => JSON.stringify({
-                id: String(r.PROV_ID).trim(), 
-                nomb: String(r.PROV_NOMB).trim()
-            })))
-        ].map(s => JSON.parse(s));
-        
-        provs.sort((a, b) => {
-            // Ordenar numéricamente por ID
-            return parseInt(a.id) - parseInt(b.id);
-        });
-        
-        provs.forEach(p => {
-            // Formato: "08 - Panamá"
-            const label = `${p.id.padStart(2, '0')} - ${p.nomb}`;
-            provSelect.options.add(new Option(label, p.id));
-        });
-    }
-}
-
-function actualizarFiltrosCascada() {
-    // Esta función se llama después de cargar datos para actualizar los filtros secundarios
-    const pVal = document.getElementById('filtro-provincia').value;
-    if (pVal && cacheDatos['distritos']) {
-        const distSelect = document.getElementById('filtro-distrito');
-        distSelect.innerHTML = '<option value="">Todos</option>';
-        
-        const filtrados = cacheDatos['distritos'].filter(r => r.PROV_ID === pVal);
-        let unicos = [...new Set(filtrados.map(r => JSON.stringify({id: r.DIST_ID, nomb: r.DIST_NOMB})))].map(s => JSON.parse(s));
-        unicos.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-        
-        unicos.forEach(d => {
-            distSelect.options.add(new Option(`${d.id} - ${d.nomb}`, d.id));
-        });
-    }
-}
-
-function rebuildSelect(id) {
-    const sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">Todos</option>';
-}
-
-function aplicarFiltrosYRenderizar() {
-    let baseDatos = cacheDatos[nivelActivo] ? [...cacheDatos[nivelActivo]] : [];
-
-    const pVal = document.getElementById('filtro-provincia').value;
-    const dVal = document.getElementById('filtro-distrito').value;
-    const cVal = document.getElementById('filtro-corregimiento').value;
-    const lVal = document.getElementById('filtro-poblado').value;
-
-    if (pVal && nivelActivo !== 'provincia') {
-        baseDatos = baseDatos.filter(r => r.PROV_ID === pVal);
-    }
-    if (dVal && ['distritos', 'corregimientos', 'poblados', 'barrios'].includes(nivelActivo)) {
-        baseDatos = baseDatos.filter(r => r.DIST_ID === dVal);
-    }
-    if (cVal && ['corregimientos', 'poblados', 'barrios'].includes(nivelActivo)) {
-        baseDatos = baseDatos.filter(r => r.CORR_ID === cVal);
-    }
-    if (lVal && ['poblados', 'barrios'].includes(nivelActivo)) {
-        baseDatos = baseDatos.filter(r => r.LUPO_ID === lVal);
-    }
-
-    const busqueda = document.getElementById('search-input').value.toLowerCase().trim();
-    if (busqueda !== "") {
-        const campos = estructurasDeCampos[nivelActivo];
-        baseDatos = baseDatos.filter(fila => {
-            return campos.some(campo => String(fila[campo] || '').toLowerCase().includes(busqueda));
-        });
-    }
-
-    datosFiltrados = baseDatos;
-    renderizarTabla();
-}
-
-function renderizarTabla() {
-    const tbody = document.getElementById('tabla-body');
-    const campos = estructurasDeCampos[nivelActivo];
-    
-    if (!campos || datosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:15px; color:#999;">No se encontraron registros.</td></tr>`;
-        document.getElementById('contador-registros').innerText = "Mostrando 0 registros";
+    // Generar cuerpo
+    if (!datosFiltrados || datosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${campos.length}" style="text-align:center; padding:30px; color:#999;">No se encontraron datos</td></tr>`;
+        document.getElementById('contador-registros').innerText = 'Mostrando 0 registros';
         return;
     }
-
-    let html = '';
+    
+    let htmlBody = '';
     datosFiltrados.forEach((fila) => {
-        html += '<tr>'; 
+        htmlBody += '<tr>';
         campos.forEach((campo) => {
             let valor = fila[campo] !== undefined && fila[campo] !== null ? String(fila[campo]) : '';
             
@@ -992,56 +901,71 @@ function renderizarTabla() {
                 titulo = valor;
                 displayValor = valor.substring(0, 45) + '…';
             }
-            html += `<td${titulo ? ` title="${titulo.replace(/"/g, '&quot;')}"` : ''}>${displayValor}</td>`;
+            htmlBody += `<td${titulo ? ` title="${titulo.replace(/"/g, '&quot;')}"` : ''}>${displayValor}</td>`;
         });
-        html += '</tr>';
+        htmlBody += '</tr>';
     });
     
-    tbody.innerHTML = html;
+    tbody.innerHTML = htmlBody;
     document.getElementById('contador-registros').innerText = `Mostrando ${datosFiltrados.length} registros`;
 }
 
 function filtrarTabla() {
-    aplicarFiltrosYRenderizar();
+    // Implementar búsqueda si es necesario
 }
 
 function ordenarTabla(campo) {
-    if (columnaOrden === campo) {
-        ordenAscendente = !ordenAscendente;
-    } else {
-        columnaOrden = campo;
-        ordenAscendente = true;
-    }
+    if (!datosFiltrados || datosFiltrados.length === 0) return;
     
     datosFiltrados.sort((a, b) => {
         let valA = String(a[campo] || '').trim();
         let valB = String(b[campo] || '').trim();
-        
-        const numA = parseFloat(valA.replace(/,/g, ''));
-        const numB = parseFloat(valB.replace(/,/g, ''));
-        if (!isNaN(numA) && !isNaN(numB) && valA !== '' && valB !== '') {
-            return ordenAscendente ? numA - numB : numB - numA;
-        }
-        
-        return ordenAscendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        return valA.localeCompare(valB, undefined, { numeric: true });
     });
-    renderizarTabla();
+    renderizarTabla(nivelActual);
 }
 
-function limpiarFiltros(recargar = true) {
-    document.getElementById('filtro-provincia').value = "";
-    rebuildSelect('filtro-distrito');
-    rebuildSelect('filtro-corregimiento');
-    rebuildSelect('filtro-poblado');
-    document.getElementById('search-input').value = "";
-    if (recargar) {
-        aplicarFiltrosYRenderizar();
-    }
+function limpiarTodo() {
+    // Limpiar todos los selects
+    document.getElementById('filtro-provincia').value = '';
+    document.getElementById('filtro-distrito').innerHTML = '<option value="">Seleccione un distrito...</option>';
+    document.getElementById('filtro-distrito').disabled = true;
+    document.getElementById('filtro-corregimiento').innerHTML = '<option value="">Seleccione un corregimiento...</option>';
+    document.getElementById('filtro-corregimiento').disabled = true;
+    document.getElementById('filtro-poblado').innerHTML = '<option value="">Seleccione un poblado...</option>';
+    document.getElementById('filtro-poblado').disabled = true;
+    document.getElementById('filtro-barrio').innerHTML = '<option value="">Seleccione un barrio...</option>';
+    document.getElementById('filtro-barrio').disabled = true;
+    
+    // Ocultar filtros adicionales
+    ocultarDesde('distritos');
+    document.getElementById('leyenda-poblados').style.display = 'none';
+    
+    // Resetear variables
+    provSeleccionada = '';
+    distSeleccionado = '';
+    corrSeleccionado = '';
+    pobSeleccionado = '';
+    nivelActual = 'provincia';
+    historialNiveles = ['provincia'];
+    datosFiltrados = [];
+    
+    // Limpiar tabla
+    document.getElementById('tabla-head').innerHTML = '';
+    document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione una provincia para ver los datos</td></tr>';
+    document.getElementById('contador-registros').innerText = 'Seleccione una provincia para comenzar';
+    document.getElementById('search-input').disabled = true;
+    document.getElementById('search-input').value = '';
+    
+    actualizarBotonRegresar();
 }
 
 function exportarCSV() {
-    if(datosFiltrados.length === 0) return;
-    const campos = estructurasDeCampos[nivelActivo];
+    if(!datosFiltrados || datosFiltrados.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    const campos = estructurasDeCampos[nivelActual];
     const csvContent = Papa.unparse({
         fields: campos,
         data: datosFiltrados
@@ -1050,7 +974,7 @@ function exportarCSV() {
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", `exportacion_${nivelActivo}_panama.csv`);
+    link.setAttribute("download", `exportacion_${nivelActual}_panama.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
