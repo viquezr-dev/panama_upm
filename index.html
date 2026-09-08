@@ -808,30 +808,35 @@ function regresarNivel() {
         distSeleccionado = '';
         corrSeleccionado = '';
         pobSeleccionado = '';
-        mostrarDatosNivel('provincia', '');
         document.getElementById('filtro-provincia').value = '';
         document.getElementById('search-input').disabled = true;
         document.getElementById('contador-registros').innerText = 'Seleccione una provincia para comenzar';
+        // Mostrar mensaje inicial
+        document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione una provincia para ver los datos</td></tr>';
+        document.getElementById('tabla-head').innerHTML = '';
     } else if (nivelAnterior === 'distritos') {
         ocultarDesde('corregimientos');
         distSeleccionado = '';
         corrSeleccionado = '';
         pobSeleccionado = '';
-        mostrarDatosNivel('provincia', provSeleccionada);
         document.getElementById('filtro-distrito').value = '';
+        // Mostrar TODOS los distritos de la provincia
+        mostrarDatosNivel('distritos', provSeleccionada);
     } else if (nivelAnterior === 'corregimientos') {
         ocultarDesde('poblados');
         corrSeleccionado = '';
         pobSeleccionado = '';
-        mostrarDatosNivel('distritos', distSeleccionado);
         document.getElementById('filtro-corregimiento').value = '';
         document.getElementById('leyenda-poblados').style.display = 'none';
+        // Mostrar TODOS los corregimientos del distrito
+        mostrarDatosNivel('corregimientos', distSeleccionado);
     } else if (nivelAnterior === 'poblados') {
         ocultarDesde('barrios');
         pobSeleccionado = '';
-        mostrarDatosNivel('corregimientos', corrSeleccionado);
         document.getElementById('filtro-poblado').value = '';
         document.getElementById('leyenda-poblados').style.display = 'block';
+        // Mostrar TODOS los poblados del corregimiento
+        mostrarDatosNivel('poblados', corrSeleccionado);
     }
     
     nivelActual = nivelAnterior;
@@ -844,10 +849,29 @@ function actualizarBotonRegresar() {
 }
 
 function mostrarDatosNivel(nivel, id) {
-    if (!id && nivel !== 'provincia') {
-        document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione un elemento para ver los datos</td></tr>';
-        document.getElementById('contador-registros').innerText = 'Seleccione un elemento para continuar';
-        return;
+    // Si no hay ID y no es provincia, mostrar todos los datos del nivel superior
+    if (!id) {
+        if (nivel === 'provincia') {
+            document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione una provincia para ver los datos</td></tr>';
+            document.getElementById('contador-registros').innerText = 'Seleccione una provincia para comenzar';
+            return;
+        } else if (nivel === 'distritos' && provSeleccionada) {
+            // Mostrar todos los distritos de la provincia
+            id = provSeleccionada;
+        } else if (nivel === 'corregimientos' && distSeleccionado) {
+            // Mostrar todos los corregimientos del distrito
+            id = distSeleccionado;
+        } else if (nivel === 'poblados' && corrSeleccionado) {
+            // Mostrar todos los poblados del corregimiento
+            id = corrSeleccionado;
+        } else if (nivel === 'barrios' && pobSeleccionado) {
+            // Mostrar todos los barrios del poblado
+            id = pobSeleccionado;
+        } else {
+            document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione un elemento para ver los datos</td></tr>';
+            document.getElementById('contador-registros').innerText = 'Seleccione un elemento para continuar';
+            return;
+        }
     }
     
     // Si no hay datos en caché, cargarlos
@@ -874,19 +898,20 @@ function procesarDatosNivel(nivel, id) {
     let datos = cacheDatos[nivel] || [];
     
     if (nivel === 'provincia' && id) {
+        // Mostrar solo la provincia seleccionada
         datos = datos.filter(r => r.PROV_ID === id);
     } else if (nivel === 'distritos' && id) {
-        // Filtrar por provincia Y distrito
-        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === id);
+        // Mostrar TODOS los distritos de la provincia seleccionada
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada);
     } else if (nivel === 'corregimientos' && id) {
-        // Filtrar por provincia, distrito Y corregimiento
-        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === id);
+        // Mostrar TODOS los corregimientos del distrito seleccionado
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado);
     } else if (nivel === 'poblados' && id) {
-        // Filtrar por provincia, distrito, corregimiento Y poblado
-        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === id);
+        // Mostrar TODOS los poblados del corregimiento seleccionado
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado);
     } else if (nivel === 'barrios' && id) {
-        // Filtrar por provincia, distrito, corregimiento, poblado Y barrio
-        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === pobSeleccionado && r.BARR_ID === id);
+        // Mostrar TODOS los barrios del poblado seleccionado
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === pobSeleccionado);
     }
     
     datosFiltrados = datos;
