@@ -584,12 +584,10 @@ function generarCabecera(nivel) {
 }
 
 function cambiarNivel(nuevoNivel) {
-    // Agregar al historial si no es el mismo nivel
+    // Solo agregar al historial si es un nivel diferente al actual
     if (nuevoNivel !== nivelActivo) {
-        // Si el último nivel en el historial es el actual, lo reemplazamos
-        if (historialNiveles[historialNiveles.length - 1] === nivelActivo) {
-            historialNiveles[historialNiveles.length - 1] = nuevoNivel;
-        } else {
+        // Verificar si el nivel ya existe en el historial para evitar duplicados
+        if (historialNiveles[historialNiveles.length - 1] !== nuevoNivel) {
             historialNiveles.push(nuevoNivel);
         }
     }
@@ -615,16 +613,22 @@ function cambiarNivel(nuevoNivel) {
 }
 
 function regresarNivel() {
+    console.log('Historial actual:', historialNiveles);
+    console.log('Nivel activo:', nivelActivo);
+    
     // Si no hay historial o solo hay un elemento, no hacer nada
     if (historialNiveles.length <= 1) {
+        console.log('No hay niveles anteriores');
         return;
     }
     
-    // Remover el nivel actual del historial
+    // Remover el nivel actual del historial (el último)
     historialNiveles.pop();
+    console.log('Historial después de pop:', historialNiveles);
     
     // Obtener el nivel anterior
     const nivelAnterior = historialNiveles[historialNiveles.length - 1];
+    console.log('Nivel anterior:', nivelAnterior);
     
     // Actualizar el nivel activo
     nivelActivo = nivelAnterior;
@@ -655,8 +659,11 @@ function regresarNivel() {
 function actualizarBotonRegresar() {
     const btnRegresar = document.querySelector('.btn-regresar');
     if (btnRegresar) {
-        btnRegresar.disabled = historialNiveles.length <= 1;
-        btnRegresar.textContent = historialNiveles.length <= 1 ? '⬅️ Inicio' : '⬅️ Regresar';
+        const habilitado = historialNiveles.length > 1;
+        btnRegresar.disabled = !habilitado;
+        btnRegresar.textContent = habilitado ? '⬅️ Regresar' : '⬅️ Inicio';
+        console.log('Botón regresar:', habilitado ? 'Habilitado' : 'Deshabilitado');
+        console.log('Longitud historial:', historialNiveles.length);
     }
 }
 
