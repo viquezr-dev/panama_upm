@@ -626,9 +626,17 @@ function generarCabecera(nivel) {
 function cambiarNivel(nuevoNivel) {
     if (nuevoNivel === nivelActivo) return;
     
-    // Actualizar historial
+    // Actualizar historial - evitar duplicados consecutivos
     if (historialNiveles[historialNiveles.length - 1] !== nuevoNivel) {
-        historialNiveles.push(nuevoNivel);
+        // Si el nivel ya existe en el historial, eliminar todos los posteriores
+        const indiceExistente = historialNiveles.indexOf(nuevoNivel);
+        if (indiceExistente !== -1) {
+            // Si el nivel ya existe, truncar el historial hasta ese punto
+            historialNiveles = historialNiveles.slice(0, indiceExistente + 1);
+        } else {
+            // Si no existe, agregar al final
+            historialNiveles.push(nuevoNivel);
+        }
     }
     
     nivelActivo = nuevoNivel;
@@ -646,7 +654,7 @@ function cambiarNivel(nuevoNivel) {
     document.getElementById('leyenda-poblados').style.display = nuevoNivel === 'poblados' ? 'block' : 'none';
     
     // Limpiar filtros al cambiar de nivel
-    limpiarFiltros(false); // false = no recargar datos automáticamente
+    limpiarFiltros(false);
     
     cargarNivelTerritorial(nuevoNivel);
     actualizarHistorialSelect();
@@ -710,7 +718,12 @@ function actualizarHistorialSelect() {
     // Restaurar valor seleccionado si existe
     if (currentValue && [...select.options].some(opt => opt.value === currentValue)) {
         select.value = currentValue;
+    } else {
+        select.value = "";
     }
+    
+    // Depuración: Mostrar el historial en consola
+    console.log('Historial actual:', historialNiveles);
 }
 
 function actualizarSelectoresFiltros() {
