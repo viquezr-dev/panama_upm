@@ -302,7 +302,25 @@
             margin: 2px 4px 2px 0;
             font-weight: 600;
         }
-
+        /* Estilo para filas seleccionadas */
+        .fila-seleccionada {
+            background-color: #c7e9fb !important;
+            border-left: 4px solid #6b5b95;
+            font-weight: 600;
+        }
+        
+        .fila-seleccionada td {
+            background-color: #c7e9fb !important;
+            border-bottom: 2px solid #6b5b95;
+        }
+        
+        .fila-seleccionada:hover {
+            background-color: #b8dff5 !important;
+        }
+        
+        .fila-seleccionada td:hover {
+            background-color: #b8dff5 !important;
+        }
         @media (max-width: 768px) {
             .filtro-select { min-width: 80px; font-size: 10px; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -530,21 +548,17 @@ function seleccionarProvincia(id) {
     nivelActual = 'distritos';
     historialNiveles = ['provincia', 'distritos'];
     
-    // Resetear variables de niveles inferiores
     distSeleccionado = '';
     corrSeleccionado = '';
     pobSeleccionado = '';
     
-    // Ocultar filtros inferiores
     ocultarDesde('distritos');
     
-    // Mostrar y habilitar distritos
     mostrarFiltro('div-filtro-dist');
     const distSelect = document.getElementById('filtro-distrito');
     distSelect.disabled = true;
     distSelect.innerHTML = '<option value="">Cargando distritos...</option>';
     
-    // Cargar distritos
     if (!cacheDatos.distritos) {
         Papa.parse(csvPaths.distritos, {
             download: true,
@@ -559,11 +573,12 @@ function seleccionarProvincia(id) {
         llenarDistritos(id);
     }
     
-    // Mostrar datos de la provincia seleccionada
+    // Pasar el ID de la provincia para mostrar y resaltar
     mostrarDatosNivel('provincia', id);
     actualizarBotonRegresar();
     document.getElementById('search-input').disabled = false;
 }
+
 
 function llenarDistritos(provId) {
     const distSelect = document.getElementById('filtro-distrito');
@@ -593,11 +608,9 @@ function seleccionarDistrito(id) {
     nivelActual = 'corregimientos';
     historialNiveles = ['provincia', 'distritos', 'corregimientos'];
     
-    // Resetear variables de niveles inferiores
     corrSeleccionado = '';
     pobSeleccionado = '';
     
-    // Ocultar filtros inferiores
     ocultarDesde('corregimientos');
     
     mostrarFiltro('div-filtro-corr');
@@ -619,10 +632,10 @@ function seleccionarDistrito(id) {
         llenarCorregimientos(provSeleccionada, id);
     }
     
+    // Pasar el ID del distrito para mostrar y resaltar
     mostrarDatosNivel('distritos', id);
     actualizarBotonRegresar();
 }
-
 function llenarCorregimientos(provId, distId) {
     const corrSelect = document.getElementById('filtro-corregimiento');
     corrSelect.innerHTML = '<option value="">Seleccione un corregimiento...</option>';
@@ -650,10 +663,8 @@ function seleccionarCorregimiento(id) {
     nivelActual = 'poblados';
     historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados'];
     
-    // Resetear variables de niveles inferiores
     pobSeleccionado = '';
     
-    // Ocultar filtros inferiores
     ocultarDesde('poblados');
     
     mostrarFiltro('div-filtro-pob');
@@ -677,6 +688,7 @@ function seleccionarCorregimiento(id) {
         llenarPoblados(provSeleccionada, distSeleccionado, id);
     }
     
+    // Pasar el ID del corregimiento para mostrar y resaltar
     mostrarDatosNivel('corregimientos', id);
     actualizarBotonRegresar();
 }
@@ -806,6 +818,7 @@ function seleccionarBarrio(id) {
         return;
     }
     
+    // Guardar el ID seleccionado y mostrar los datos resaltando el barrio
     mostrarDatosNivel('barrios', id);
 }
 
@@ -930,16 +943,12 @@ function mostrarDatosNivel(nivel, id) {
             document.getElementById('contador-registros').innerText = 'Seleccione una provincia para comenzar';
             return;
         } else if (nivel === 'distritos' && provSeleccionada) {
-            // Mostrar todos los distritos de la provincia
             id = provSeleccionada;
         } else if (nivel === 'corregimientos' && distSeleccionado) {
-            // Mostrar todos los corregimientos del distrito
             id = distSeleccionado;
         } else if (nivel === 'poblados' && corrSeleccionado) {
-            // Mostrar todos los poblados del corregimiento
             id = corrSeleccionado;
         } else if (nivel === 'barrios' && pobSeleccionado) {
-            // Mostrar todos los barrios del poblado
             id = pobSeleccionado;
         } else {
             document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Seleccione un elemento para ver los datos</td></tr>';
@@ -972,27 +981,22 @@ function procesarDatosNivel(nivel, id) {
     let datos = cacheDatos[nivel] || [];
     
     if (nivel === 'provincia' && id) {
-        // Mostrar solo la provincia seleccionada
         datos = datos.filter(r => r.PROV_ID === id);
     } else if (nivel === 'distritos' && id) {
-        // Mostrar TODOS los distritos de la provincia seleccionada
         datos = datos.filter(r => r.PROV_ID === provSeleccionada);
     } else if (nivel === 'corregimientos' && id) {
-        // Mostrar TODOS los corregimientos del distrito seleccionado
         datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado);
     } else if (nivel === 'poblados' && id) {
-        // Mostrar TODOS los poblados del corregimiento seleccionado
         datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado);
     } else if (nivel === 'barrios' && id) {
-        // Mostrar TODOS los barrios del poblado seleccionado
         datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === pobSeleccionado);
     }
     
     datosFiltrados = datos;
-    renderizarTabla(nivel);
+    renderizarTabla(nivel, id);
 }
 
-function renderizarTabla(nivel) {
+function renderizarTabla(nivel, idSeleccionado) {
     const head = document.getElementById('tabla-head');
     const tbody = document.getElementById('tabla-body');
     const campos = estructurasDeCampos[nivel];
@@ -1017,7 +1021,42 @@ function renderizarTabla(nivel) {
     
     let htmlBody = '';
     datosFiltrados.forEach((fila) => {
-        htmlBody += '<tr>';
+        // Determinar si esta fila debe resaltarse
+        let esSeleccionado = false;
+        
+        // Para barrios: resaltar el barrio seleccionado
+        if (nivel === 'barrios' && idSeleccionado) {
+            const barrioId = fila.BARR_ID ? String(fila.BARR_ID).trim() : '';
+            if (barrioId === idSeleccionado) {
+                esSeleccionado = true;
+            }
+        }
+        // Para poblados: resaltar el poblado seleccionado
+        else if (nivel === 'poblados' && idSeleccionado) {
+            const lupoId = fila.LUPO_ID ? String(fila.LUPO_ID).trim() : '';
+            if (lupoId === idSeleccionado) {
+                esSeleccionado = true;
+            }
+        }
+        // Para corregimientos: resaltar el corregimiento seleccionado
+        else if (nivel === 'corregimientos' && idSeleccionado) {
+            const corrId = fila.CORR_ID ? String(fila.CORR_ID).trim() : '';
+            if (corrId === idSeleccionado) {
+                esSeleccionado = true;
+            }
+        }
+        // Para distritos: resaltar el distrito seleccionado
+        else if (nivel === 'distritos' && idSeleccionado) {
+            const distId = fila.DIST_ID ? String(fila.DIST_ID).trim() : '';
+            if (distId === idSeleccionado) {
+                esSeleccionado = true;
+            }
+        }
+        
+        // Aplicar clase de resaltado
+        const claseFila = esSeleccionado ? 'fila-seleccionada' : '';
+        htmlBody += `<tr class="${claseFila}">`;
+        
         campos.forEach((campo) => {
             let valor = fila[campo] !== undefined && fila[campo] !== null ? String(fila[campo]) : '';
             
