@@ -101,7 +101,7 @@
             margin: 6px 0;
             font-size: 11px;
             color: #b46f3a;
-            display: none; /* Oculto por defecto, cambia a 'block' si lo quieres visible */
+            display: none;
         }
         .toolbar {
             background: #fef9f4;
@@ -117,6 +117,7 @@
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .btn-nivel {
             padding: 5px 12px;
@@ -133,6 +134,24 @@
             background: #6b5b95;
             color: white;
             border-color: #6b5b95;
+        }
+        .btn-regresar {
+            padding: 5px 14px;
+            background: #ffd3b6;
+            color: #a5673f;
+            border: 2px solid #ffc4a0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: all 0.2s ease;
+        }
+        .btn-regresar:hover {
+            background: #ffc4a0;
+        }
+        .btn-regresar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .filtros-container {
             display: flex;
@@ -280,7 +299,6 @@
             font-size: 12px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .filtro-select { min-width: 80px; font-size: 9px; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -290,6 +308,7 @@
             .filtro-select { flex: 1; min-width: 0; }
             .selector-nivel { justify-content: center; }
             .btn-nivel { padding: 4px 10px; font-size: 10px; }
+            .btn-regresar { padding: 4px 10px; font-size: 10px; }
             th, td { padding: 4px 6px; font-size: 9px; }
             .table-wrapper { max-height: 350px; }
             .controles-globales { justify-content: center; }
@@ -303,6 +322,7 @@
             .logo-section strong { font-size: 12px; }
             th, td { padding: 3px 5px; font-size: 8px; }
             .btn-nivel { padding: 3px 8px; font-size: 9px; }
+            .btn-regresar { padding: 3px 8px; font-size: 9px; }
             table { min-width: 500px; }
             .search-box { font-size: 11px; padding: 5px 12px; }
         }
@@ -345,6 +365,7 @@
                     <button class="btn-nivel" onclick="cambiarNivel('corregimientos')">Corregimientos</button>
                     <button class="btn-nivel" onclick="cambiarNivel('poblados')">Poblados</button>
                     <button class="btn-nivel" onclick="cambiarNivel('barrios')">Barrios</button>
+                    <button class="btn-regresar" onclick="regresarNivel()">⬅️ Regresar</button>
                 </div>
             </div>
 
@@ -476,10 +497,12 @@ let nivelActivo = 'provincia';
 let datosFiltrados = [];
 let ordenAscendente = true;
 let columnaOrden = '';
+let historialNiveles = ['provincia']; // Historial de navegación
 
 window.addEventListener('DOMContentLoaded', () => {
     inicializarContadorVisitas();
     cargarNivelTerritorial(nivelActivo);
+    actualizarBotonRegresar();
 });
 
 function inicializarContadorVisitas() {
@@ -543,6 +566,7 @@ function procesarYMostrar(nivel) {
 
     generarCabecera(nivel);
     aplicarFiltrosYRenderizar();
+    actualizarBotonRegresar();
 }
 
 function generarCabecera(nivel) {
@@ -560,6 +584,16 @@ function generarCabecera(nivel) {
 }
 
 function cambiarNivel(nuevoNivel) {
+    // Agregar al historial si no es el mismo nivel
+    if (nuevoNivel !== nivelActivo) {
+        // Si el último nivel en el historial es el actual, lo reemplazamos
+        if (historialNiveles[historialNiveles.length - 1] === nivelActivo) {
+            historialNiveles[historialNiveles.length - 1] = nuevoNivel;
+        } else {
+            historialNiveles.push(nuevoNivel);
+        }
+    }
+    
     nivelActivo = nuevoNivel;
     
     const botones = document.querySelectorAll('.btn-nivel');
@@ -575,7 +609,55 @@ function cambiarNivel(nuevoNivel) {
     document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nuevoNivel) ? 'block' : 'none';
     document.getElementById('div-filtro-lupo').style.display = nuevoNivel === 'barrios' ? 'block' : 'none';
     document.getElementById('leyenda-poblados').style.display = nuevoNivel === 'poblados' ? 'block' : 'none';
+    
     cargarNivelTerritorial(nuevoNivel);
+    actualizarBotonRegresar();
+}
+
+function regresarNivel() {
+    // Si no hay historial o solo hay un elemento, no hacer nada
+    if (historialNiveles.length <= 1) {
+        return;
+    }
+    
+    // Remover el nivel actual del historial
+    historialNiveles.pop();
+    
+    // Obtener el nivel anterior
+    const nivelAnterior = historialNiveles[historialNiveles.length - 1];
+    
+    // Actualizar el nivel activo
+    nivelActivo = nivelAnterior;
+    
+    // Actualizar la interfaz
+    const botones = document.querySelectorAll('.btn-nivel');
+    const mapeoIndices = { provincia: 0, distritos: 1, corregimientos: 2, poblados: 3, barrios: 4 };
+    
+    botones.forEach(b => b.classList.remove('active'));
+    if (mapeoIndices[nivelAnterior] !== undefined) {
+        botones[mapeoIndices[nivelAnterior]].classList.add('active');
+    }
+
+    document.getElementById('div-filtro-prov').style.display = nivelAnterior !== 'provincia' ? 'block' : 'none';
+    document.getElementById('div-filtro-dist').style.display = ['corregimientos', 'poblados', 'barrios'].includes(nivelAnterior) ? 'block' : 'none';
+    document.getElementById('div-filtro-corr').style.display = ['poblados', 'barrios'].includes(nivelAnterior) ? 'block' : 'none';
+    document.getElementById('div-filtro-lupo').style.display = nivelAnterior === 'barrios' ? 'block' : 'none';
+    document.getElementById('leyenda-poblados').style.display = nivelAnterior === 'poblados' ? 'block' : 'none';
+    
+    // Limpiar filtros para mostrar todos los datos del nivel anterior
+    limpiarFiltros();
+    
+    // Cargar el nivel anterior
+    cargarNivelTerritorial(nivelAnterior);
+    actualizarBotonRegresar();
+}
+
+function actualizarBotonRegresar() {
+    const btnRegresar = document.querySelector('.btn-regresar');
+    if (btnRegresar) {
+        btnRegresar.disabled = historialNiveles.length <= 1;
+        btnRegresar.textContent = historialNiveles.length <= 1 ? '⬅️ Inicio' : '⬅️ Regresar';
+    }
 }
 
 function aplicarFiltrosYRenderizar() {
