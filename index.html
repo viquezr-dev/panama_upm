@@ -530,6 +530,14 @@ function seleccionarProvincia(id) {
     nivelActual = 'distritos';
     historialNiveles = ['provincia', 'distritos'];
     
+    // Resetear variables de niveles inferiores
+    distSeleccionado = '';
+    corrSeleccionado = '';
+    pobSeleccionado = '';
+    
+    // Ocultar filtros inferiores
+    ocultarDesde('distritos');
+    
     // Mostrar y habilitar distritos
     mostrarFiltro('div-filtro-dist');
     const distSelect = document.getElementById('filtro-distrito');
@@ -575,12 +583,22 @@ function seleccionarDistrito(id) {
     if (!id) {
         ocultarDesde('distritos');
         mostrarDatosNivel('provincia', provSeleccionada);
+        distSeleccionado = '';
+        corrSeleccionado = '';
+        pobSeleccionado = '';
         return;
     }
     
     distSeleccionado = id;
     nivelActual = 'corregimientos';
     historialNiveles = ['provincia', 'distritos', 'corregimientos'];
+    
+    // Resetear variables de niveles inferiores
+    corrSeleccionado = '';
+    pobSeleccionado = '';
+    
+    // Ocultar filtros inferiores
+    ocultarDesde('corregimientos');
     
     mostrarFiltro('div-filtro-corr');
     const corrSelect = document.getElementById('filtro-corregimiento');
@@ -623,12 +641,20 @@ function seleccionarCorregimiento(id) {
     if (!id) {
         ocultarDesde('corregimientos');
         mostrarDatosNivel('distritos', distSeleccionado);
+        corrSeleccionado = '';
+        pobSeleccionado = '';
         return;
     }
     
     corrSeleccionado = id;
     nivelActual = 'poblados';
     historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados'];
+    
+    // Resetear variables de niveles inferiores
+    pobSeleccionado = '';
+    
+    // Ocultar filtros inferiores
+    ocultarDesde('poblados');
     
     mostrarFiltro('div-filtro-pob');
     document.getElementById('leyenda-poblados').style.display = 'block';
@@ -673,12 +699,16 @@ function seleccionarPoblado(id) {
     if (!id) {
         ocultarDesde('poblados');
         mostrarDatosNivel('corregimientos', corrSeleccionado);
+        pobSeleccionado = '';
         return;
     }
     
     pobSeleccionado = id;
     nivelActual = 'barrios';
     historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados', 'barrios'];
+    
+    // Ocultar filtros inferiores
+    ocultarDesde('barrios');
     
     mostrarFiltro('div-filtro-bar');
     const barSelect = document.getElementById('filtro-barrio');
@@ -820,6 +850,7 @@ function mostrarDatosNivel(nivel, id) {
         return;
     }
     
+    // Si no hay datos en caché, cargarlos
     if (!cacheDatos[nivel]) {
         Papa.parse(csvPaths[nivel], {
             download: true,
@@ -828,6 +859,10 @@ function mostrarDatosNivel(nivel, id) {
             complete: function(results) {
                 cacheDatos[nivel] = results.data;
                 procesarDatosNivel(nivel, id);
+            },
+            error: function(err) {
+                console.error("Error cargando datos:", err);
+                document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:30px; color:#999;">Error al cargar los datos</td></tr>';
             }
         });
     } else {
@@ -841,13 +876,17 @@ function procesarDatosNivel(nivel, id) {
     if (nivel === 'provincia' && id) {
         datos = datos.filter(r => r.PROV_ID === id);
     } else if (nivel === 'distritos' && id) {
-        datos = datos.filter(r => r.DIST_ID === id);
+        // Filtrar por provincia Y distrito
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === id);
     } else if (nivel === 'corregimientos' && id) {
-        datos = datos.filter(r => r.CORR_ID === id);
+        // Filtrar por provincia, distrito Y corregimiento
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === id);
     } else if (nivel === 'poblados' && id) {
-        datos = datos.filter(r => r.LUPO_ID === id);
+        // Filtrar por provincia, distrito, corregimiento Y poblado
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === id);
     } else if (nivel === 'barrios' && id) {
-        datos = datos.filter(r => r.BARR_ID === id);
+        // Filtrar por provincia, distrito, corregimiento, poblado Y barrio
+        datos = datos.filter(r => r.PROV_ID === provSeleccionada && r.DIST_ID === distSeleccionado && r.CORR_ID === corrSeleccionado && r.LUPO_ID === pobSeleccionado && r.BARR_ID === id);
     }
     
     datosFiltrados = datos;
