@@ -1053,7 +1053,13 @@ function renderizarTabla(nivel, idSeleccionado) {
                 esSeleccionado = true;
             }
         }
-        
+        // Para provincia: resaltar la provincia seleccionada
+        if (nivel === 'provincia' && idSeleccionado) {
+            const provId = fila.PROV_ID ? String(fila.PROV_ID).trim() : '';
+            if (provId === idSeleccionado) {
+                esSeleccionado = true;
+            }
+        }
         // Aplicar clase de resaltado
         const claseFila = esSeleccionado ? 'fila-seleccionada' : '';
         htmlBody += `<tr class="${claseFila}">`;
