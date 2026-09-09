@@ -1051,7 +1051,7 @@ function renderizarTabla(nivel, idSeleccionado) {
     let htmlHead = '<tr>';
     campos.forEach((campo) => {
         let label = nombresColumnas[campo] || campo;
-        // Solo mostrar indicador para TIPO y CATE
+        // SOLO mostrar indicador para TIPO y CATE (NO para CLASE)
         if (nivel === 'poblados' && (campo === 'LUPO_TIPO' || campo === 'LUPO_CATE')) {
             label += ' 📖';
         }
