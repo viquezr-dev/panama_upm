@@ -1051,8 +1051,8 @@ function renderizarTabla(nivel, idSeleccionado) {
     let htmlHead = '<tr>';
     campos.forEach((campo) => {
         let label = nombresColumnas[campo] || campo;
-        // Si es nivel poblados y es un campo traducible, agregar indicador
-        if (nivel === 'poblados' && (campo === 'LUPO_CLASE' || campo === 'LUPO_TIPO' || campo === 'LUPO_CATE')) {
+        // Solo mostrar indicador para TIPO y CATE
+        if (nivel === 'poblados' && (campo === 'LUPO_TIPO' || campo === 'LUPO_CATE')) {
             label += ' 📖';
         }
         htmlHead += `<th onclick="ordenarTabla('${campo}')">${label}</th>`;
@@ -1095,15 +1095,11 @@ function renderizarTabla(nivel, idSeleccionado) {
         campos.forEach((campo) => {
             let valor = fila[campo] !== undefined && fila[campo] !== null ? String(fila[campo]) : '';
             
-            // **AQUÍ ESTÁ LA CORRECCIÓN**: Traducir valores para poblados
-            // Verificar que el campo existe en el diccionario y estamos en nivel poblados
-            if (nivel === 'poblados' && campo in significadosPoblados) {
-                // Intentar traducir el valor
+            // **SOLO traducir TIPO y CATE, NO CLASE**
+            if (nivel === 'poblados' && (campo === 'LUPO_TIPO' || campo === 'LUPO_CATE')) {
                 const valorLimpio = String(valor).trim();
-                if (significadosPoblados[campo][valorLimpio]) {
+                if (significadosPoblados[campo] && significadosPoblados[campo][valorLimpio]) {
                     valor = significadosPoblados[campo][valorLimpio];
-                } else if (significadosPoblados[campo][valor]) {
-                    valor = significadosPoblados[campo][valor];
                 }
             }
             
