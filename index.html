@@ -1006,6 +1006,46 @@ function procesarDatosNivel(nivel, id) {
     renderizarTabla(nivel, id);
 }
 
+// Diccionario de significados para Poblados
+const significadosPoblados = {
+    'LUPO_CLASE': {
+        '1': 'Cabecera',
+        '2': 'Poblado Completo',
+        '3': 'Poblado Parte',
+        '4': 'Cabecera Parte'
+    },
+    'LUPO_TIPO': {
+        '1': 'Urbano',
+        '2': 'Rural',
+        '3': 'Indígena'
+    },
+    'LUPO_CATE': {
+        '1': 'Poblado',
+        '2': 'Sitio'
+    }
+};
+
+function traducirValor(campo, valor) {
+    if (!valor) return valor;
+    
+    // Limpiar el valor (quitar espacios y caracteres extra)
+    const valorLimpio = String(valor).trim();
+    
+    // Si es un campo de poblados y tiene traducción
+    if (significadosPoblados[campo]) {
+        const traduccion = significadosPoblados[campo][valorLimpio];
+        if (traduccion) {
+            return traduccion;
+        }
+        // Si no encuentra traducción, intentar con el valor original
+        const traduccionOriginal = significadosPoblados[campo][valor];
+        if (traduccionOriginal) {
+            return traduccionOriginal;
+        }
+    }
+    return valor;
+}
+        
 function renderizarTabla(nivel, idSeleccionado) {
     const head = document.getElementById('tabla-head');
     const tbody = document.getElementById('tabla-body');
@@ -1016,7 +1056,11 @@ function renderizarTabla(nivel, idSeleccionado) {
     // Generar cabecera
     let htmlHead = '<tr>';
     campos.forEach((campo) => {
-        const label = nombresColumnas[campo] || campo;
+        let label = nombresColumnas[campo] || campo;
+        // Si es nivel poblados y es un campo traducible, agregar indicador
+        if (nivel === 'poblados' && (campo === 'LUPO_CLASE' || campo === 'LUPO_TIPO' || campo === 'LUPO_CATE')) {
+            label += ' 📖';
+        }
         htmlHead += `<th onclick="ordenarTabla('${campo}')">${label}</th>`;
     });
     htmlHead += '</tr>';
@@ -1031,51 +1075,45 @@ function renderizarTabla(nivel, idSeleccionado) {
     
     let htmlBody = '';
     datosFiltrados.forEach((fila) => {
-        // Determinar si esta fila debe resaltarse
         let esSeleccionado = false;
         
-        // Para barrios: resaltar el barrio seleccionado
+        // Determinar si esta fila debe resaltarse
         if (nivel === 'barrios' && idSeleccionado) {
             const barrioId = fila.BARR_ID ? String(fila.BARR_ID).trim() : '';
-            if (barrioId === idSeleccionado) {
-                esSeleccionado = true;
-            }
-        }
-        // Para poblados: resaltar el poblado seleccionado
-        else if (nivel === 'poblados' && idSeleccionado) {
+            if (barrioId === idSeleccionado) esSeleccionado = true;
+        } else if (nivel === 'poblados' && idSeleccionado) {
             const lupoId = fila.LUPO_ID ? String(fila.LUPO_ID).trim() : '';
-            if (lupoId === idSeleccionado) {
-                esSeleccionado = true;
-            }
-        }
-        // Para corregimientos: resaltar el corregimiento seleccionado
-        else if (nivel === 'corregimientos' && idSeleccionado) {
+            if (lupoId === idSeleccionado) esSeleccionado = true;
+        } else if (nivel === 'corregimientos' && idSeleccionado) {
             const corrId = fila.CORR_ID ? String(fila.CORR_ID).trim() : '';
-            if (corrId === idSeleccionado) {
-                esSeleccionado = true;
-            }
-        }
-        // Para distritos: resaltar el distrito seleccionado
-        else if (nivel === 'distritos' && idSeleccionado) {
+            if (corrId === idSeleccionado) esSeleccionado = true;
+        } else if (nivel === 'distritos' && idSeleccionado) {
             const distId = fila.DIST_ID ? String(fila.DIST_ID).trim() : '';
-            if (distId === idSeleccionado) {
-                esSeleccionado = true;
-            }
-        }
-        // Para provincia: resaltar la provincia seleccionada
-        if (nivel === 'provincia' && idSeleccionado) {
+            if (distId === idSeleccionado) esSeleccionado = true;
+        } else if (nivel === 'provincia' && idSeleccionado) {
             const provId = fila.PROV_ID ? String(fila.PROV_ID).trim() : '';
-            if (provId === idSeleccionado) {
-                esSeleccionado = true;
-            }
+            if (provId === idSeleccionado) esSeleccionado = true;
         }
-        // Aplicar clase de resaltado
+        
         const claseFila = esSeleccionado ? 'fila-seleccionada' : '';
         htmlBody += `<tr class="${claseFila}">`;
         
         campos.forEach((campo) => {
             let valor = fila[campo] !== undefined && fila[campo] !== null ? String(fila[campo]) : '';
             
+            // **AQUÍ ESTÁ LA CORRECCIÓN**: Traducir valores para poblados
+            // Verificar que el campo existe en el diccionario y estamos en nivel poblados
+            if (nivel === 'poblados' && campo in significadosPoblados) {
+                // Intentar traducir el valor
+                const valorLimpio = String(valor).trim();
+                if (significadosPoblados[campo][valorLimpio]) {
+                    valor = significadosPoblados[campo][valorLimpio];
+                } else if (significadosPoblados[campo][valor]) {
+                    valor = significadosPoblados[campo][valor];
+                }
+            }
+            
+            // CONVERSIÓN A KILÓMETROS
             if (campo === 'Shape_Area' && valor !== '') {
                 let num = parseFloat(valor.replace(/,/g, ''));
                 if (!isNaN(num)) {
