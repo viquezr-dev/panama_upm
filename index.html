@@ -981,7 +981,8 @@ function procesarDatosNivel(nivel, id) {
     let datos = cacheDatos[nivel] || [];
     
     if (nivel === 'provincia' && id) {
-        datos = datos.filter(r => r.PROV_ID === id);
+        // Mostrar TODAS las provincias, sin filtrar
+        datos = cacheDatos.provincia || [];
     } else if (nivel === 'distritos' && id) {
         datos = datos.filter(r => r.PROV_ID === provSeleccionada);
     } else if (nivel === 'corregimientos' && id) {
