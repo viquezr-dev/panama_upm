@@ -548,6 +548,9 @@ function seleccionarProvincia(id) {
     nivelActual = 'distritos';
     historialNiveles = ['provincia', 'distritos'];
     
+    // Ocultar leyenda de poblados (no estamos en poblados)
+    document.getElementById('leyenda-poblados').style.display = 'none';
+    
     distSeleccionado = '';
     corrSeleccionado = '';
     pobSeleccionado = '';
@@ -573,7 +576,6 @@ function seleccionarProvincia(id) {
         llenarDistritos(id);
     }
     
-    // Pasar el ID de la provincia para mostrar y resaltar
     mostrarDatosNivel('provincia', id);
     actualizarBotonRegresar();
     document.getElementById('search-input').disabled = false;
@@ -601,12 +603,17 @@ function seleccionarDistrito(id) {
         distSeleccionado = '';
         corrSeleccionado = '';
         pobSeleccionado = '';
+        // Ocultar leyenda de poblados
+        document.getElementById('leyenda-poblados').style.display = 'none';
         return;
     }
     
     distSeleccionado = id;
     nivelActual = 'corregimientos';
     historialNiveles = ['provincia', 'distritos', 'corregimientos'];
+    
+    // Ocultar leyenda de poblados
+    document.getElementById('leyenda-poblados').style.display = 'none';
     
     corrSeleccionado = '';
     pobSeleccionado = '';
@@ -632,10 +639,10 @@ function seleccionarDistrito(id) {
         llenarCorregimientos(provSeleccionada, id);
     }
     
-    // Pasar el ID del distrito para mostrar y resaltar
     mostrarDatosNivel('distritos', id);
     actualizarBotonRegresar();
 }
+
 function llenarCorregimientos(provId, distId) {
     const corrSelect = document.getElementById('filtro-corregimiento');
     corrSelect.innerHTML = '<option value="">Seleccione un corregimiento...</option>';
@@ -656,6 +663,8 @@ function seleccionarCorregimiento(id) {
         mostrarDatosNivel('distritos', distSeleccionado);
         corrSeleccionado = '';
         pobSeleccionado = '';
+        // Ocultar leyenda de poblados
+        document.getElementById('leyenda-poblados').style.display = 'none';
         return;
     }
     
@@ -663,12 +672,14 @@ function seleccionarCorregimiento(id) {
     nivelActual = 'poblados';
     historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados'];
     
+    // Mostrar leyenda de poblados (estamos en poblados)
+    document.getElementById('leyenda-poblados').style.display = 'block';
+    
     pobSeleccionado = '';
     
     ocultarDesde('poblados');
     
     mostrarFiltro('div-filtro-pob');
-    document.getElementById('leyenda-poblados').style.display = 'block';
     
     const pobSelect = document.getElementById('filtro-poblado');
     pobSelect.disabled = true;
@@ -688,7 +699,6 @@ function seleccionarCorregimiento(id) {
         llenarPoblados(provSeleccionada, distSeleccionado, id);
     }
     
-    // Pasar el ID del corregimiento para mostrar y resaltar
     mostrarDatosNivel('corregimientos', id);
     actualizarBotonRegresar();
 }
@@ -741,7 +751,6 @@ function seleccionarPoblado(id) {
     actualizarBotonRegresar();
 }
 function verificarYMostrarBarrios(provId, distId, corrId, lupoId) {
-    // Buscar barrios para este poblado
     const barriosExistentes = cacheDatos.barrios.filter(r => 
         r.PROV_ID === provId && 
         r.DIST_ID === distId && 
@@ -752,15 +761,12 @@ function verificarYMostrarBarrios(provId, distId, corrId, lupoId) {
     const barSelect = document.getElementById('filtro-barrio');
     
     if (barriosExistentes.length === 0) {
-        // No hay barrios, mostrar mensaje
         mostrarFiltro('div-filtro-bar');
         barSelect.innerHTML = '<option value="">⚠️ Este poblado no tiene barrios</option>';
         barSelect.disabled = true;
-        // Estilizar el mensaje
         barSelect.style.color = '#999';
         barSelect.style.fontStyle = 'italic';
         
-        // Mostrar mensaje en la tabla
         document.getElementById('contador-registros').innerHTML = '📢 Este poblado no tiene barrios registrados';
         document.getElementById('contador-registros').style.color = '#b46f3a';
         document.getElementById('contador-registros').style.background = '#fff7e6';
@@ -768,10 +774,14 @@ function verificarYMostrarBarrios(provId, distId, corrId, lupoId) {
         document.getElementById('contador-registros').style.borderRadius = '8px';
         document.getElementById('contador-registros').style.border = '1px solid #ffe0b5';
         
-        // No agregar barrios al historial
         historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados'];
+        
+        // Mantener leyenda de poblados visible (seguimos en poblados)
+        document.getElementById('leyenda-poblados').style.display = 'block';
     } else {
-        // Hay barrios, mostrarlos normalmente
+        // Hay barrios - Ocultar la leyenda de poblados porque pasamos a barrios
+        document.getElementById('leyenda-poblados').style.display = 'none';
+        
         document.getElementById('contador-registros').style.color = '#8b6b4d';
         document.getElementById('contador-registros').style.background = 'transparent';
         document.getElementById('contador-registros').style.padding = '0';
@@ -786,7 +796,6 @@ function verificarYMostrarBarrios(provId, distId, corrId, lupoId) {
         
         llenarBarrios(provId, distId, corrId, lupoId);
         
-        // Actualizar historial para incluir barrios
         historialNiveles = ['provincia', 'distritos', 'corregimientos', 'poblados', 'barrios'];
     }
 }
@@ -912,19 +921,19 @@ function regresarNivel() {
         // Mostrar TODOS los corregimientos del distrito
         mostrarDatosNivel('corregimientos', distSeleccionado);
     } else if (nivelAnterior === 'poblados') {
-        ocultarDesde('barrios');
-        pobSeleccionado = '';
-        document.getElementById('filtro-poblado').value = '';
-        document.getElementById('leyenda-poblados').style.display = 'block';
-        ocultarFiltro('div-filtro-bar');
-        document.getElementById('contador-registros').style.color = '#8b6b4d';
-        document.getElementById('contador-registros').style.background = 'transparent';
-        document.getElementById('contador-registros').style.padding = '0';
-        document.getElementById('contador-registros').style.border = 'none';
-        document.getElementById('contador-registros').innerHTML = '';
-        // Mostrar TODOS los poblados del corregimiento
-        mostrarDatosNivel('poblados', corrSeleccionado);
-    }
+    ocultarDesde('barrios');
+    pobSeleccionado = '';
+    document.getElementById('filtro-poblado').value = '';
+    // Mostrar leyenda porque volvemos a poblados
+    document.getElementById('leyenda-poblados').style.display = 'block';
+    ocultarFiltro('div-filtro-bar');
+    document.getElementById('contador-registros').style.color = '#8b6b4d';
+    document.getElementById('contador-registros').style.background = 'transparent';
+    document.getElementById('contador-registros').style.padding = '0';
+    document.getElementById('contador-registros').style.border = 'none';
+    document.getElementById('contador-registros').innerHTML = '';
+    mostrarDatosNivel('poblados', corrSeleccionado);
+}
     
     nivelActual = nivelAnterior;
     actualizarBotonRegresar();
